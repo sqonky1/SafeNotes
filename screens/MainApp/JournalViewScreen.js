@@ -2,10 +2,10 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { theme } from '../../constants/colors' // adjust path if needed
 
-export default function JournalScreen() {
+export default function JournalViewScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>JournalScreen screen</Text>
+      <Text style={styles.text}>JournalViewScreen screen</Text>
     </View>
   )
 }

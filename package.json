@@ -20,15 +20,18 @@
     "expo-location": "~18.1.5",
     "expo-media-library": "~17.1.6",
     "expo-secure-store": "~14.2.3",
+    "expo-splash-screen": "~0.30.8",
     "expo-status-bar": "~2.2.3",
     "firebase": "^11.8.1",
+    "lucide-react-native": "^0.511.0",
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "react-native-svg": "15.11.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
