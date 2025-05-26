@@ -7,5 +7,6 @@ export const theme = {
   accent: '#4181D4',           // Info blue
   danger: '#CA3535',           // Heart red
   border: '#2c2c2e',           // Optional subtle borders
-  input: '#262626',            // TextInput background
+  input: '#262626',
+  highlight: '#4A4A4A'            // TextInput background
 }
