@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
 import { theme } from '../../constants/colors';
 import { ArrowLeft } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SettingsContext } from '../../contexts/SettingsContext';
 
 export default function CalculatorUnlock() {
   const navigation = useNavigation();
@@ -15,6 +16,9 @@ export default function CalculatorUnlock() {
   const [result, setResult] = useState('');
   const [lastResult, setLastResult] = useState(null);
   const [justEvaluated, setJustEvaluated] = useState(false);
+
+  // PIN unlock logic
+  const { setIsUnlocked } = useContext(SettingsContext);
 
   const handlePress = (value) => {
     const operators = ['+', '-', '*', '/', '%', '.'];
@@ -56,7 +60,7 @@ export default function CalculatorUnlock() {
 
     // Check for unlock PIN directly entered
     if (cleaned === '1234') {
-      // ✅ trigger unlock logic here
+      setIsUnlocked(true);
       return;
     }
 

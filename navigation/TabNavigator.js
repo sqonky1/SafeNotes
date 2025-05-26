@@ -11,6 +11,10 @@ import SettingsScreen from '../screens/Settings/SettingsScreen'
 // Tab icons
 import { Home, BookOpenText, MessageSquareText, Paperclip, Settings } from 'lucide-react-native'
 
+import { TapGestureHandler } from 'react-native-gesture-handler';
+import { useContext } from 'react';
+import {View} from 'react-native';
+import { SettingsContext } from '../contexts/SettingsContext';
 
 const Tab = createBottomTabNavigator()
 
@@ -38,13 +42,6 @@ export default function TabNavigator() {
         }}
     />
     <Tab.Screen
-        name="Journal"
-        component={JournalScreen}
-        options={{
-            tabBarIcon: ({ color, size }) => <Paperclip color={color} size={20} />,
-        }}
-    />
-    <Tab.Screen
         name="Info"
         component={InfoStackNavigator}
         options={{
@@ -56,6 +53,13 @@ export default function TabNavigator() {
         component={ChatbotScreen}
         options={{
             tabBarIcon: ({ color, size }) => <MessageSquareText color={color} size={20} />,
+        }}
+    />
+    <Tab.Screen
+        name="Journal"
+        component={JournalScreen}
+        options={{
+            tabBarIcon: ({ color, size }) => <Paperclip color={color} size={20} />,
         }}
     />
     <Tab.Screen

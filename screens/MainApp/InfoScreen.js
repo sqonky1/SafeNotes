@@ -13,6 +13,7 @@ export default function InfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.background,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -19,7 +19,7 @@ export default function InfoStackNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
         headerStyle: { backgroundColor: '#121212' },
         headerTintColor: '#fff',
         headerTitleStyle: { fontFamily: 'Inter' },
