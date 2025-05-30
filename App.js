@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
 import React, { useCallback, useEffect } from 'react';
 import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
