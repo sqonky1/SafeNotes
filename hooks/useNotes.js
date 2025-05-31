@@ -29,19 +29,25 @@ export const useNotes = () => {
       setNotes(newNotes);
     } catch (err) {
       console.error('Failed to save notes:', err);
+      alert('Storage error: ' + err.message);
     }
   };
 
-  const addNote = async ({ title, content }) => {
-    const newNote = {
-      id: uuid.v4(),
-      title: title || '',
-      content: content || '',
-      timestamp: Date.now(),
-    };
-    const updated = [newNote, ...notes];
-    await saveNotes(updated);
-    return newNote;
+  const addNote = async ({ title, content, timestamp }) => {
+    try {
+      const newNote = {
+        id: uuid.v4(),
+        title: title || '',
+        content: content || '',
+        timestamp: timestamp || Date.now(),
+      };
+      const updated = [newNote, ...notes];
+      await saveNotes(updated);
+      return newNote;
+    } catch (err) {
+      console.error('Add note failed:', err);
+      throw err;
+    }
   };
 
   const updateNote = async (id, { title, content, timestamp }) => {

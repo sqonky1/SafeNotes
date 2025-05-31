@@ -138,11 +138,15 @@ export default function NoteDetailScreen() {
           ...(hasChanged && { timestamp: Date.now() }) // ← only add timestamp if changed
         });
       } else {
-        await addNote({
-          title: trimmedTitle,
-          content: trimmedContent,
-          timestamp: Date.now()
-        });
+        try {
+          await addNote({
+            title: trimmedTitle,
+            content: trimmedContent,
+            timestamp: Date.now()
+          });
+        } catch (err) {
+          alert('Failed to save note: ' + err.message);
+        }
       }
 
       await reload();
