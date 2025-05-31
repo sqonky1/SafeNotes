@@ -34,7 +34,7 @@ export default function RootNavigator() {
     return (
       <TapGestureHandler
         numberOfTaps={3}
-        maxDelayMs={600}
+        maxDelayMs={150}
         shouldCancelWhenOutside={false}
         onHandlerStateChange={tripleTapHandler}
       >
@@ -46,7 +46,7 @@ export default function RootNavigator() {
           </Stack.Navigator>
         </View>
       </TapGestureHandler>
-    );
+    ); 
   }
 
   return (

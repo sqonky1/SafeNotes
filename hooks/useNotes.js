@@ -34,10 +34,10 @@ export const useNotes = () => {
 
   const addNote = async ({ title, content }) => {
     const newNote = {
-    id: uuid.v4(), // bc it works in React Native
-    title,
-    content,
-    timestamp: Date.now(),
+      id: uuid.v4(),
+      title: title || '',
+      content: content || '',
+      timestamp: Date.now(),
     };
     const updated = [newNote, ...notes];
     await saveNotes(updated);

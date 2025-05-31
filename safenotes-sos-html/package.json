@@ -1,0 +1,7 @@
+{
+  "name": "safenotes-sos-html",
+  "version": "1.0.0",
+  "description": "Generate dynamic HTML page for embedded SOS media",
+  "main": "index.js",
+  "type": "module"
+}

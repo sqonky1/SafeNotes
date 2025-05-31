@@ -1,0 +1,7 @@
+name = "safenotes-sos-html"
+main = "index.js"
+compatibility_date = "2024-05-31"
+
+[[kv_namespaces]]
+binding = "HTML_KV"
+id = "4238128be77b4be2833107220e1029af"

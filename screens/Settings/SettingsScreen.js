@@ -1,10 +1,12 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { theme } from '../../constants/colors' // adjust path if needed
+import BackButton from '../../components/UI/BackButton'
 
 export default function SettingsScreen() {
   return (
     <View style={styles.container}>
+      <BackButton />
       <Text style={styles.text}>SettingsScreen screen</Text>
     </View>
   )

@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
 import React, { useCallback, useEffect } from 'react';
 import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
@@ -5,6 +7,7 @@ import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigator from './navigation/RootNavigator';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { TabHistoryProvider } from './contexts/TabHistoryContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Keep splash screen visible until fonts are ready
@@ -28,9 +31,11 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <SettingsProvider>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <TabHistoryProvider>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </TabHistoryProvider>
         </SettingsProvider>
       </View>
     </GestureHandlerRootView>
