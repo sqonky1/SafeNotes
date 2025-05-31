@@ -32,13 +32,12 @@
     "expo-splash-screen": "~0.30.8",
     "expo-status-bar": "~2.2.3",
     "express": "^5.1.0",
-    "firebase": "^11.8.1",
     "htmlparser2": "^10.0.0",
     "lucide-react-native": "^0.511.0",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
-    "react-native-markdown-renderer": "^3.2.8",
     "react-native-mime-types": "^2.5.0",
     "react-native-pell-rich-editor": "^1.9.0",
     "react-native-reanimated": "~3.17.4",
@@ -51,7 +50,8 @@
     "react-native-webview": "^13.13.5",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "expo-document-picker": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -3,7 +3,7 @@ import { View, Text, Button, Image, Alert, ScrollView, StyleSheet } from 'react-
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { saveMediaLocally } from '../services/saveMediaLocally';
-import { uploadMediaFromLocalAndGetPublicUrl } from '../services/uploadMediaFromLocal';
+import { uploadMediaFromLocal } from '../services/uploadMediaFromLocal';
 
 export default function TestUploadScreen() {
   const [localUri, setLocalUri] = useState(null);
