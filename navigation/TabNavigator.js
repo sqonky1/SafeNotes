@@ -27,11 +27,22 @@ export default function TabNavigator() {
         tabBarActiveTintColor: '#FFF',
         tabBarInactiveTintColor: '#888',
         tabBarStyle: {
+          height: 100,
           backgroundColor: '#262626',
+          paddingBottom: 10, // Optional: tweak for icon alignment
+          paddingTop: 10,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Inter',
+        },
+        tabBarItemStyle: {
+          flex: 0.9,
+          justifyContent: 'center',  // ✅ Vertically center
+          alignItems: 'center',
         },
       }}
     >
@@ -39,7 +50,7 @@ export default function TabNavigator() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color }) => <Home color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Home color={color} size={27} />,
         }}
       />
       <Tab.Screen
@@ -54,7 +65,7 @@ export default function TabNavigator() {
           },
         })}
         options={{
-          tabBarIcon: ({ color }) => <BookOpenText color={color} size={20} />,
+          tabBarIcon: ({ color }) => <BookOpenText color={color} size={27} />,
         }}
       />
       <Tab.Screen
@@ -69,7 +80,7 @@ export default function TabNavigator() {
           },
         })}
         options={{
-          tabBarIcon: ({ color }) => <MessageSquareText color={color} size={20} />,
+          tabBarIcon: ({ color }) => <MessageSquareText color={color} size={27} />,
         }}
       />
       <Tab.Screen
@@ -84,7 +95,7 @@ export default function TabNavigator() {
           },
         })}
         options={{
-          tabBarIcon: ({ color }) => <Paperclip color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Paperclip color={color} size={27} />,
         }}
       />
       <Tab.Screen
@@ -99,7 +110,7 @@ export default function TabNavigator() {
           },
         })}
         options={{
-          tabBarIcon: ({ color }) => <Settings color={color} size={20} />,
+          tabBarIcon: ({ color }) => <Settings color={color} size={27} />,
         }}
       />
     </Tab.Navigator>
