@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native'
 import { theme } from '../../constants/colors' // adjust path if needed
 
 const HeartIcon = <Heart color="red" size={20} />
-const InfoIcon = <Info color="lightblue" size={20} />
+const InfoIcon = <Info color="#4181D4" size={20} />
 
 const items = [
   { icon: HeartIcon, label: 'Signs of domestic violence' },
@@ -27,7 +27,7 @@ export default function InfoScreen() {
       </Pressable>
 
       {/* H1 Heading */}
-      <Text style={styles.h1}>Information Page</Text>
+      <Text style={styles.h1}>Information</Text>
 
       {/* List of items */}
       <ScrollView>
