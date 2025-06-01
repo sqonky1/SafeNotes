@@ -16,6 +16,7 @@ export default function CalculatorUnlock() {
   const [result, setResult] = useState('');
   const [lastResult, setLastResult] = useState(null);
   const [justEvaluated, setJustEvaluated] = useState(false);
+  const { accessPin } = useContext(SettingsContext);
 
   // PIN unlock logic
   const { setIsUnlocked } = useContext(SettingsContext);
@@ -59,7 +60,7 @@ export default function CalculatorUnlock() {
     const cleaned = expression.trim();
 
     // Check for unlock PIN directly entered
-    if (cleaned === '1234') {
+    if (cleaned === accessPin) {
       setIsUnlocked(true);
       return;
     }
