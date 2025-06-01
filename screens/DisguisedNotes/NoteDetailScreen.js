@@ -23,8 +23,6 @@ import { DomHandler, ElementType } from 'domhandler';
 import { default as serialize } from 'dom-serializer';
 
 export default function NoteDetailScreen() {
-  console.log("🚀 NoteDetailScreen mounted");
-
   const navigation = useNavigation();
   const route = useRoute();
   const { noteId } = route.params;
@@ -88,7 +86,6 @@ export default function NoteDetailScreen() {
 
   // 🔄 Load note on mount or when noteId changes
   useEffect(() => {
-    console.log("📄 useEffect triggered. noteId =", noteId); // 👈 ADD THIS
     const loadNote = async () => {
       if (noteId) {
         const note = await getNoteByIdAsync(noteId);
@@ -105,7 +102,7 @@ export default function NoteDetailScreen() {
           }, 0);
         }
       } else {
-        console.log("📄 Creating new note"); // 👈 ADD THIS
+        console.log("📄 Creating new note"); 
       }
     };
     loadNote();

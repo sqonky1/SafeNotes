@@ -21,24 +21,13 @@ export default function NotesHome() {
   const { notes, deleteNote, reload } = useNotes();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // DEBUG: print raw “notes” and its type
-  console.log('📝 [NotesHome] notes (raw from hook):', notes);
-  console.log(
-    '📝 [NotesHome] typeof notes:',
-    typeof notes,
-    'Array.isArray(notes)=',
-    Array.isArray(notes)
-  );
-
   // Force notes to be an array, even if something went wrong
   const safeNotesArray = Array.isArray(notes) ? notes : [];
-  console.log('📝 [NotesHome] safeNotesArray (guaranteed array):', safeNotesArray);
 
   // Filter them
   const filteredNotes = safeNotesArray.filter((note) =>
     note.title?.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
-  console.log('📝 [NotesHome] filteredNotes:', filteredNotes);
 
   useFocusEffect(
     useCallback(() => {

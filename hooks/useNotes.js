@@ -16,14 +16,12 @@ export const useNotes = () => {
   const loadNotes = async () => {
     try {
       const saved = await AsyncStorage.getItem(NOTES_KEY);
-      console.log('🔥 [useNotes] raw “saved” from AsyncStorage:', saved);
 
       let parsed = [];
       if (saved) {
         try {
           const tmp = JSON.parse(saved);
           // DEBUG: log what we got after parse
-          console.log('🔥 [useNotes] JSON.parse(saved) →', tmp);
 
           // Only accept it if it’s actually an array
           if (Array.isArray(tmp)) {
@@ -40,7 +38,6 @@ export const useNotes = () => {
         }
       }
 
-      console.log('🔥 [useNotes] Final “parsed” (forced to array):', parsed);
       setNotes(parsed);
     } catch (err) {
       console.error('❌ [useNotes] Failed to load notes:', err);
@@ -50,7 +47,6 @@ export const useNotes = () => {
 
   const saveNotes = async (newNotes) => {
     try {
-      console.log('💾 [useNotes] Saving “newNotes” array:', newNotes);
       await AsyncStorage.setItem(NOTES_KEY, JSON.stringify(newNotes));
       setNotes(newNotes);
     } catch (err) {
@@ -77,7 +73,6 @@ export const useNotes = () => {
 
   const updateNote = async (id, { title, content, timestamp }) => {
     const current = Array.isArray(notes) ? notes : [];
-    console.log('✏️ [useNotes] updateNote(): current notes array is:', current);
 
     const updated = current.map((note) =>
       note.id === id
@@ -89,17 +84,14 @@ export const useNotes = () => {
           }
         : note
     );
-    console.log('✏️ [useNotes] updateNote(): new array will be:', updated);
 
     await saveNotes(updated);
   };
 
   const deleteNote = async (id) => {
     const current = Array.isArray(notes) ? notes : [];
-    console.log('🗑️ [useNotes] deleteNote(): current notes array is:', current);
 
     const filtered = current.filter((note) => note.id !== id);
-    console.log('🗑️ [useNotes] deleteNote(): filtered array will be:', filtered);
 
     await saveNotes(filtered);
   };
