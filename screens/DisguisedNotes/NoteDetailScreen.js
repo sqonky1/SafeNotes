@@ -1,3 +1,5 @@
+// screens/DisguisedNotes/NoteDetailScreen.js
+
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
@@ -21,11 +23,12 @@ import { DomHandler, ElementType } from 'domhandler';
 import { default as serialize } from 'dom-serializer';
 
 export default function NoteDetailScreen() {
+  console.log("🚀 NoteDetailScreen mounted");
+
   const navigation = useNavigation();
   const route = useRoute();
   const { noteId } = route.params;
 
-  // Custom hook to manage notes
   const { addNote, updateNote, getNoteById, reload, getNoteByIdAsync } = useNotes();
 
   const [title, setTitle] = useState('');
@@ -41,9 +44,11 @@ export default function NoteDetailScreen() {
   const originalTitleRef = useRef('');
   const originalContentRef = useRef('');
 
+  // Inject <span> tags into the HTML string (safe template‐string usage)
   const injectHighlights = (html, keyword) => {
     if (!keyword || !html) return html;
 
+    // Escape special regex chars in keyword
     const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escaped})`, 'gi');
 
@@ -53,6 +58,7 @@ export default function NoteDetailScreen() {
       if (!node) return;
 
       if (node.type === 'text') {
+        // IMPORTANT: the <span> below is inside backticks (string!), not raw JSX:
         node.data = node.data.replace(regex, match =>
           `<span style="background-color: ${theme.highlight}; border-radius: 4px;">${match}</span>`
         );
@@ -67,47 +73,48 @@ export default function NoteDetailScreen() {
     return serialize(dom);
   };
 
+  // A simpler, regex‐based highlighter (also using backtick strings)
   const injectHighlightsSafely = (html, keyword) => {
     if (!keyword) return html;
 
-    // Only inject inside paragraph/body text nodes
-    return html.replace(/>([^<]+)</g, (match, text) => {
-      const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+
+    return html.replace(/>([^<]+)</g, (wholeMatch, text) => {
       const highlighted = text.replace(regex, `<span style="background-color:${theme.highlight}; border-radius:4px;">$1</span>`);
       return `>${highlighted}<`;
     });
   };
 
-  // 🔄 Load note
+  // 🔄 Load note on mount or when noteId changes
   useEffect(() => {
+    console.log("📄 useEffect triggered. noteId =", noteId); // 👈 ADD THIS
     const loadNote = async () => {
       if (noteId) {
-        const note = await getNoteByIdAsync(noteId); // ✅ no more red squiggles
-
+        const note = await getNoteByIdAsync(noteId);
+        console.log("📄 Loaded existing note:", note); // 👈 ADD THIS
         if (note) {
           setTitle(note.title || '');
           setHtmlContent(note.content || '');
-
           originalTitleRef.current = note.title || '';
           originalContentRef.current = note.content || '';
-
           setTimeout(() => {
             if (editorRef.current) {
               editorRef.current.setContentHTML(note.content || '');
             }
           }, 0);
         }
+      } else {
+        console.log("📄 Creating new note"); // 👈 ADD THIS
       }
     };
-
     loadNote();
   }, [noteId]);
 
-  // 🔍 Highlight search
+  // 🔍 Whenever searchQuery changes, update the editor’s HTML
   useEffect(() => {
     if (!editorRef.current) return;
     const clean = cleanHTMLRef.current;
-
     if (searchQuery.trim()) {
       const highlighted = injectHighlightsSafely(clean, searchQuery);
       editorRef.current.setContentHTML(highlighted);
@@ -116,11 +123,12 @@ export default function NoteDetailScreen() {
     }
   }, [searchQuery]);
 
-  // ✅ Save note
+  // ✅ Save or update note
   const handleSave = async () => {
     const trimmedTitle = title.trim();
     const trimmedContent = htmlContent.trim();
 
+    // If completely empty, just go back
     if (!trimmedTitle && !trimmedContent) {
       navigation.goBack();
       return;
@@ -132,23 +140,18 @@ export default function NoteDetailScreen() {
 
     try {
       if (noteId) {
+        // Only add a new timestamp if content/title changed
         await updateNote(noteId, {
           title: trimmedTitle,
           content: trimmedContent,
-          ...(hasChanged && { timestamp: Date.now() }) // ← only add timestamp if changed
+          ...(hasChanged && { timestamp: Date.now() }),
         });
       } else {
-        try {
-          await addNote({
-            title: trimmedTitle,
-            content: trimmedContent,
-            timestamp: Date.now()
-          });
-        } catch (err) {
-          alert('Failed to save note: ' + err.message);
-        }
+        await addNote({
+          title: trimmedTitle,
+          content: trimmedContent,
+        });
       }
-
       await reload();
       navigation.goBack();
     } catch (err) {
@@ -157,7 +160,10 @@ export default function NoteDetailScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           {/* Header */}
@@ -169,7 +175,7 @@ export default function NoteDetailScreen() {
             <View style={{ width: 24 }} />
           </View>
 
-          {/* Title */}
+          {/* Title Input */}
           <TextInput
             placeholder="Title"
             placeholderTextColor={theme.muted}
@@ -178,35 +184,51 @@ export default function NoteDetailScreen() {
             onChangeText={setTitle}
           />
 
-          {/* Editor */}
-          <RichEditor
-            ref={editorRef}
-            placeholder="Write something..."
-            style={styles.richEditor}
-            initialContentHTML={htmlContent}
-            onChange={(html) => {
-              setHtmlContent(html);
-              cleanHTMLRef.current = html;
-            }}
-            editorStyle={{
-              backgroundColor: theme.input,
-              color: theme.text,
-              contentCSSText: `body { font-family: Inter; font-size: 16px; padding: 0 8px; }`,
-            }}
-          />
+          {/* RichEditor for content */}
+          {Platform.OS === 'android' ? (
+            <TextInput
+              placeholder="Write something..."
+              placeholderTextColor={theme.muted}
+              style={styles.plainEditor}
+              value={htmlContent}
+              onChangeText={setHtmlContent}
+              multiline
+              textAlignVertical="top"
+            />
+          ) : (
+            <RichEditor
+              ref={editorRef}
+              placeholder="Write something..."
+              style={styles.richEditor}
+              initialContentHTML={htmlContent}
+              onChange={(html) => {
+                setHtmlContent(html);
+                cleanHTMLRef.current = html;
+              }}
+              editorStyle={{
+                backgroundColor: theme.input,
+                color: theme.text,
+                contentCSSText: `body { font-family: Inter; font-size: 16px; padding: 0 8px; }`,
+              }}
+            />
+          )}
 
-          {/* Built-in formatting toolbar */}
-          {showRichToolbar && (
+          {/* Built‐in formatting toolbar (bold, italic, bullets) */}
+          {Platform.OS === 'ios' && showRichToolbar && (
             <RichToolbar
               editor={editorRef}
               actions={[actions.setBold, actions.setItalic, actions.insertBulletsList]}
               iconTint={theme.text}
               selectedIconTint={theme.accent}
-              style={{ backgroundColor: theme.card, borderTopWidth: 1, borderTopColor: theme.border }}
+              style={{
+                backgroundColor: theme.card,
+                borderTopWidth: 1,
+                borderTopColor: theme.border,
+              }}
             />
           )}
 
-          {/* Search bar */}
+          {/* Search bar (only visible if showSearchBar === true) */}
           {showSearchBar && (
             <View style={styles.searchBar}>
               <TextInput
@@ -219,11 +241,11 @@ export default function NoteDetailScreen() {
             </View>
           )}
 
-          {/* Custom toolbar buttons */}
+          {/* Bottom toolbar: toggle search, toggle format, open calculator */}
           <NoteToolbar
-            onSearch={() => setShowSearchBar(prev => !prev)}
+            onSearch={() => setShowSearchBar((prev) => !prev)}
             onCalculator={() => navigation.navigate('CalculatorUnlock')}
-            onFormat={() => setShowRichToolbar(prev => !prev)}
+            onFormat={() => setShowRichToolbar((prev) => !prev)}
           />
         </View>
       </TouchableWithoutFeedback>
@@ -279,5 +301,15 @@ const styles = StyleSheet.create({
     color: theme.text,
     fontFamily: 'Inter',
     fontSize: 14,
+  },
+  plainEditor: {
+    flex: 1,
+    backgroundColor: theme.input,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    color: theme.text,
+    fontSize: 16,
+    fontFamily: 'Inter',
   },
 });

@@ -16,20 +16,45 @@ export const useNotes = () => {
   const loadNotes = async () => {
     try {
       const saved = await AsyncStorage.getItem(NOTES_KEY);
-      const parsed = saved ? JSON.parse(saved) : [];
+      console.log('🔥 [useNotes] raw “saved” from AsyncStorage:', saved);
+
+      let parsed = [];
+      if (saved) {
+        try {
+          const tmp = JSON.parse(saved);
+          // DEBUG: log what we got after parse
+          console.log('🔥 [useNotes] JSON.parse(saved) →', tmp);
+
+          // Only accept it if it’s actually an array
+          if (Array.isArray(tmp)) {
+            parsed = tmp;
+          } else {
+            console.warn(
+              '⚠️ [useNotes] Parsed value was not an array—falling back to []'
+            );
+            parsed = [];
+          }
+        } catch (e) {
+          console.warn('⚠️ [useNotes] JSON.parse failed:', e);
+          parsed = [];
+        }
+      }
+
+      console.log('🔥 [useNotes] Final “parsed” (forced to array):', parsed);
       setNotes(parsed);
     } catch (err) {
-      console.error('Failed to load notes:', err);
+      console.error('❌ [useNotes] Failed to load notes:', err);
+      setNotes([]); // ensure it’s always an array
     }
   };
 
   const saveNotes = async (newNotes) => {
     try {
+      console.log('💾 [useNotes] Saving “newNotes” array:', newNotes);
       await AsyncStorage.setItem(NOTES_KEY, JSON.stringify(newNotes));
       setNotes(newNotes);
     } catch (err) {
-      console.error('Failed to save notes:', err);
-      alert('Storage error: ' + err.message);
+      console.error('❌ [useNotes] Failed to save notes:', err);
     }
   };
 
@@ -51,36 +76,55 @@ export const useNotes = () => {
   };
 
   const updateNote = async (id, { title, content, timestamp }) => {
-    const updated = notes.map(note =>
+    const current = Array.isArray(notes) ? notes : [];
+    console.log('✏️ [useNotes] updateNote(): current notes array is:', current);
+
+    const updated = current.map((note) =>
       note.id === id
         ? {
             ...note,
             title,
             content,
-            ...(timestamp !== undefined ? { timestamp } : {}) // ✅ only update if explicitly passed
+            ...(timestamp !== undefined ? { timestamp } : {}),
           }
         : note
     );
+    console.log('✏️ [useNotes] updateNote(): new array will be:', updated);
+
     await saveNotes(updated);
   };
 
   const deleteNote = async (id) => {
-    const filtered = notes.filter(note => note.id !== id);
+    const current = Array.isArray(notes) ? notes : [];
+    console.log('🗑️ [useNotes] deleteNote(): current notes array is:', current);
+
+    const filtered = current.filter((note) => note.id !== id);
+    console.log('🗑️ [useNotes] deleteNote(): filtered array will be:', filtered);
+
     await saveNotes(filtered);
   };
 
   const getNoteById = (id) => {
-    return notes.find(note => note.id === id);
+    if (!Array.isArray(notes)) return null;
+    return notes.find((note) => note.id === id);
   };
 
   const getNoteByIdAsync = async (id) => {
     try {
-        const saved = await AsyncStorage.getItem(NOTES_KEY);
-        const parsed = saved ? JSON.parse(saved) : [];
-        return parsed.find(note => note.id === id);
+      const saved = await AsyncStorage.getItem(NOTES_KEY);
+      let parsed = [];
+      if (saved) {
+        try {
+          const tmp = JSON.parse(saved);
+          parsed = Array.isArray(tmp) ? tmp : [];
+        } catch {
+          parsed = [];
+        }
+      }
+      return parsed.find((note) => note.id === id) ?? null;
     } catch (err) {
-        console.error('Failed to read note:', err);
-        return null;
+      console.error('❌ [useNotes] Failed to read note by ID:', err);
+      return null;
     }
   };
 

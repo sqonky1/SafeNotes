@@ -1,3 +1,4 @@
+// screens/DisguisedNotes/NotesHome.js
 import React from 'react';
 import {
   View,
@@ -13,20 +14,36 @@ import { useNotes } from '../../hooks/useNotes';
 import { theme } from '../../constants/colors';
 import { Calculator, X } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export default function NotesHome() {
+  const navigation = useNavigation();
+  const { notes, deleteNote, reload } = useNotes();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // DEBUG: print raw “notes” and its type
+  console.log('📝 [NotesHome] notes (raw from hook):', notes);
+  console.log(
+    '📝 [NotesHome] typeof notes:',
+    typeof notes,
+    'Array.isArray(notes)=',
+    Array.isArray(notes)
+  );
+
+  // Force notes to be an array, even if something went wrong
+  const safeNotesArray = Array.isArray(notes) ? notes : [];
+  console.log('📝 [NotesHome] safeNotesArray (guaranteed array):', safeNotesArray);
+
+  // Filter them
+  const filteredNotes = safeNotesArray.filter((note) =>
+    note.title?.toLowerCase().startsWith(searchQuery.toLowerCase())
+  );
+  console.log('📝 [NotesHome] filteredNotes:', filteredNotes);
+
   useFocusEffect(
     useCallback(() => {
       reload();
     }, [])
-  );
-  const navigation = useNavigation();
-  const { notes, deleteNote, reload } = useNotes();
-  const [searchQuery, setSearchQuery] = useState('');
-  const filteredNotes = notes.filter(note =>
-    note.title?.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
 
   const handleDelete = (id) => {
@@ -87,10 +104,14 @@ export default function NotesHome() {
         />
       </View>
 
-      {/* Notes List */}
+      {/* NOTES LIST */}
       <FlatList
-        data={[...filteredNotes].sort((a, b) => b.timestamp - a.timestamp)}
-        keyExtractor={(item) => item.id}
+        data={
+          Array.isArray(filteredNotes)
+            ? [...filteredNotes].sort((a, b) => b.timestamp - a.timestamp)
+            : []
+        }
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
       />
