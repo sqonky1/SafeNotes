@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+// JournalScreen.js
+import React, { useRef, useContext } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -9,20 +11,22 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../constants/colors';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import { useNavigation } from '@react-navigation/native';
 import { AudioLines, ImageIcon, Camera } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { saveMediaLocally } from '../../services/saveMediaLocally';
 import Constants from 'expo-constants';
-import { Audio } from 'expo-av';
+import { Audio, Video } from 'expo-av';
 import BackButton from '../../components/UI/BackButton';
+import AudioRecordModal from '../../components/audio/AudioRecordModal';
 
 export default function JournalScreen() {
-  const [media, setMedia] = useState([]);
+  const [media, setMedia] = React.useState([]);
   const stopTimeout = useRef(null);
   const navigation = useNavigation();
   const {
@@ -30,26 +34,57 @@ export default function JournalScreen() {
     cameraEnabled,
     micEnabled,
     galleryEnabled,
+    setIsUnlocked,
   } = useContext(SettingsContext);
-  const [recording, setRecording] = useState(null);
+  const [recording, setRecording] = React.useState(null);
+  const isExpoGo = Constants.appOwnership === 'expo';
+  const [showMicModal, setShowMicModal] = React.useState(false);
 
-  useEffect(() => {
-    loadMedia();
-  }, []);
+  const STORAGE_KEY = 'journalMedia';
 
-  const loadMedia = async () => {
-    const stored = await SecureStore.getItemAsync('journalMedia');
-    let parsed = stored ? JSON.parse(stored) : [];
+  useFocusEffect(
+    React.useCallback(() => {
+      loadMediaFromAsyncStorage();
+    }, [autoWipeTTL])
+  );
 
-    if (autoWipeTTL !== 'never') {
-      const threshold = Date.now() - (autoWipeTTL === '24h' ? 86400000 : 172800000);
-      parsed = parsed.filter(item => item.timestamp > threshold);
+  function resolveMediaType(uri, fallback = 'unknown') {
+    if (uri.endsWith('.mp4')) return 'video';
+    if (uri.endsWith('.jpg') || uri.endsWith('.jpeg') || uri.endsWith('.png')) return 'image';
+    if (uri.endsWith('.m4a') || uri.endsWith('.mp3') || uri.endsWith('.aac')) return 'audio';
+    return fallback;
+  }
+
+  async function loadMediaFromAsyncStorage() {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      let parsed = stored ? JSON.parse(stored) : [];
+
+      if (autoWipeTTL !== 'never') {
+        const threshold =
+          Date.now() - (autoWipeTTL === '24h' ? 86400000 : 172800000);
+        const fresh = [];
+        for (const item of parsed) {
+          if (item.timestamp > threshold) {
+            fresh.push(item);
+          } else {
+            try {
+              await FileSystem.deleteAsync(item.uri, { idempotent: true });
+            } catch (e) {
+              console.warn('Failed to delete expired media:', item.uri);
+            }
+          }
+        }
+        parsed = fresh;
+      }
+
+      parsed.sort((a, b) => b.timestamp - a.timestamp);
+      setMedia(parsed);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    } catch (e) {
+      console.warn('Failed to load Journal from AsyncStorage:', e);
     }
-
-    parsed.sort((a, b) => b.timestamp - a.timestamp);
-    setMedia(parsed);
-    await SecureStore.setItemAsync('journalMedia', JSON.stringify(parsed));
-  };
+  }
 
   const showPermissionDialog = (type, onCancel) => {
     Alert.alert(
@@ -67,41 +102,120 @@ export default function JournalScreen() {
 
   const handleGalleryUpload = async () => {
     if (!galleryEnabled) {
-      showPermissionDialog('Media Gallery', () => {}); // prevents continuation
+      showPermissionDialog('Media Gallery', () => {});
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.All });
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+      });
+      if (result.canceled) return;
+
+      const asset = result.assets[0];
+      const uri = asset.uri;
       const savedPath = await saveMediaLocally(uri);
-      const type = uri.includes('video') ? 'video' : uri.includes('image') ? 'image' : 'unknown';
+      const type = resolveMediaType(savedPath, asset?.type ?? 'unknown');
+
+      const info = await FileSystem.getInfoAsync(savedPath);
+      if (!info.exists) {
+        Alert.alert('Save failed', 'Could not save selected media.');
+        return;
+      }
+
       const entry = {
         id: Date.now().toString(),
         uri: savedPath,
         type,
         timestamp: Date.now(),
       };
-      const updated = [entry, ...media];
-      setMedia(updated);
-      await SecureStore.setItemAsync('journalMedia', JSON.stringify(updated));
+
+      setMedia((prev) => [entry, ...prev]);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([entry, ...media]));
+
+      setTimeout(() => {
+        setIsUnlocked(true);
+      }, 500);
+      setTimeout(() => {
+        navigation.navigate('Journal');
+      }, 500);
+    } catch (e) {
+      Alert.alert('Upload Error', 'Something went wrong while uploading media.');
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => navigation.navigate('MediaView', { media, index: media.findIndex(m => m.id === item.id) })}
-    >
-      {item.type === 'audio' ? (
-        <View style={styles.audioPlaceholder}>
-          <AudioLines color={theme.text} size={32} />
-        </View>
-      ) : (
-        <Image source={{ uri: item.uri }} style={styles.image} />
-      )}
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    try {
+      if (!item || !item.uri || !item.type) return null;
+
+      const openMedia = () => {
+        const mediaIndex = media.findIndex((m) => m.id === item.id);
+        if (mediaIndex === -1) {
+          Alert.alert('Error', 'Media not found.');
+          return;
+        }
+        navigation.navigate('MediaView', {
+          media,
+          index: mediaIndex,
+        });
+      };
+
+      if (item.type === 'audio') {
+        return (
+          <TouchableOpacity style={styles.itemContainer} onPress={openMedia}>
+            <View style={styles.audioPlaceholder}>
+              <AudioLines color={theme.text} size={32} />
+            </View>
+          </TouchableOpacity>
+        );
+      }
+
+      if (item.type === 'video') {
+        return (
+          <TouchableOpacity style={styles.itemContainer} onPress={openMedia}>
+            <View style={styles.videoWrapper}>
+              <Video
+                source={{ uri: item.uri }}
+                style={styles.videoThumbnail}
+                useNativeControls={false}
+                resizeMode="cover"
+                shouldPlay={false}
+                isLooping={false}
+              />
+              <View style={styles.playIcon}>
+                <Ionicons name="play" size={36} color="#fff" style={{ transform: [{ translateY: -6 }, { translateX: -5 }] }} />
+              </View>
+            </View>
+          </TouchableOpacity>
+        );
+      }
+
+      if (item.type === 'image') {
+        return (
+          <TouchableOpacity style={styles.itemContainer} onPress={openMedia}>
+            <Image source={{ uri: item.uri }} style={styles.image} />
+          </TouchableOpacity>
+        );
+      }
+
+      return null;
+    } catch (err) {
+      console.warn('🛠️ Failed to render media item:', err);
+      return null;
+    }
+  };
+
+  function openMedia(item) {
+    const mediaIndex = media.findIndex((m) => m.id === item.id);
+    if (mediaIndex === -1) {
+      Alert.alert('Error', 'Media not found.');
+      return;
+    }
+    navigation.navigate('MediaView', {
+      media,
+      index: mediaIndex,
+    });
+  }
 
   const handleCameraCapture = async () => {
     if (!cameraEnabled) {
@@ -121,22 +235,28 @@ export default function JournalScreen() {
           {
             text: 'Continue with Photo Only',
             onPress: async () => {
-              const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-              });
+              try {
+                const result = await ImagePicker.launchCameraAsync({
+                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                });
+                if (!result.canceled) {
+                  const asset = result.assets[0];
+                  const uri = asset.uri;
+                  const entry = {
+                    id: Date.now().toString(),
+                    uri,
+                    type: 'image',
+                    timestamp: Date.now(),
+                  };
+                  const updated = [entry, ...media];
+                  setMedia(updated);
+                  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-              if (!result.canceled) {
-                const uri = result.assets[0].uri;
-                const savedPath = await saveMediaLocally(uri);
-                const entry = {
-                  id: Date.now().toString(),
-                  uri: savedPath,
-                  type: 'image',
-                  timestamp: Date.now(),
-                };
-                const updated = [entry, ...media];
-                setMedia(updated);
-                await SecureStore.setItemAsync('journalMedia', JSON.stringify(updated));
+                  setIsUnlocked(true);
+                  navigation.navigate('Journal');
+                }
+              } catch {
+                Alert.alert('Error', 'Could not take photo.');
               }
             },
           },
@@ -145,25 +265,30 @@ export default function JournalScreen() {
       return;
     }
 
-    // ✅ mic + camera both enabled
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      videoMaxDuration: 30,
-    });
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        videoMaxDuration: 30,
+      });
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        const mediaType = asset.type ?? result.type;
+        const uri = asset.uri;
+        const entry = {
+          id: Date.now().toString(),
+          uri,
+          type: mediaType,
+          timestamp: Date.now(),
+        };
+        const updated = [entry, ...media];
+        setMedia(updated);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      const savedPath = await saveMediaLocally(uri);
-      const type = uri.includes('video') ? 'video' : 'image';
-      const entry = {
-        id: Date.now().toString(),
-        uri: savedPath,
-        type,
-        timestamp: Date.now(),
-      };
-      const updated = [entry, ...media];
-      setMedia(updated);
-      await SecureStore.setItemAsync('journalMedia', JSON.stringify(updated));
+        setIsUnlocked(true);
+        navigation.navigate('Journal');
+      }
+    } catch {
+      Alert.alert('Error', 'Could not open camera.');
     }
   };
 
@@ -188,8 +313,7 @@ export default function JournalScreen() {
       stopTimeout.current = setTimeout(() => {
         handleStopRecording();
       }, 60000);
-    } catch (error) {
-      console.error('Failed to start recording', error);
+    } catch {
       Alert.alert('Error', 'Could not start recording.');
     }
   };
@@ -205,19 +329,16 @@ export default function JournalScreen() {
       setRecording(null);
 
       const savedPath = await saveMediaLocally(uri);
-
       const entry = {
         id: Date.now().toString(),
         uri: savedPath,
         type: 'audio',
         timestamp: Date.now(),
       };
-
       const updated = [entry, ...media];
       setMedia(updated);
-      await SecureStore.setItemAsync('journalMedia', JSON.stringify(updated));
-    } catch (error) {
-      console.error('Failed to stop recording', error);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
       Alert.alert('Error', 'Could not save recording.');
     }
   };
@@ -230,7 +351,7 @@ export default function JournalScreen() {
       </View>
 
       <Text style={styles.autowipe}>
-        Auto-wipe: Every {autoWipeTTL === 'never' ? 'Never' : autoWipeTTL}
+        Auto-wipe: {autoWipeTTL === 'never' ? 'Never' : 'Every ' + autoWipeTTL}
       </Text>
       <Text style={styles.subtext}>Audio max 60s • Video max 30s</Text>
 
@@ -240,10 +361,10 @@ export default function JournalScreen() {
         renderItem={renderItem}
         numColumns={3}
         contentContainerStyle={styles.grid}
+        overScrollMode="never" // 👈 PREVENTS BOUNCE-CRASH on Android
       />
 
       <View style={styles.fabContainer}>
-        {/* Mic FAB */}
         <TouchableOpacity
           style={[
             styles.fab,
@@ -254,21 +375,21 @@ export default function JournalScreen() {
               showPermissionDialog('Microphone');
               return;
             }
-            if (Platform.OS === 'android' && Constants.appOwnership !== 'expo') {
-              if (!recording) {
-                handleStartRecording();
-              } else {
-                handleStopRecording();
-              }
-            } else {
-              Alert.alert('Unavailable', 'Audio recording is only supported on Android with a custom build.');
+
+            if (isExpoGo) {
+              Alert.alert(
+                'Notice',
+                'Expo Go cannot record audio.\nUse a custom dev build/emulator to test this feature.'
+              );
+              return;
             }
+
+            setShowMicModal(true);
           }}
         >
           <AudioLines color="#fff" size={30} />
         </TouchableOpacity>
 
-        {/* Camera FAB */}
         <TouchableOpacity
           style={[
             styles.fab,
@@ -279,7 +400,6 @@ export default function JournalScreen() {
           <Camera color="#fff" size={30} />
         </TouchableOpacity>
 
-        {/* Gallery FAB */}
         <TouchableOpacity
           style={[
             styles.fab,
@@ -290,6 +410,23 @@ export default function JournalScreen() {
           <ImageIcon color="#fff" size={30} />
         </TouchableOpacity>
       </View>
+
+      <AudioRecordModal
+        visible={showMicModal}
+        onClose={() => setShowMicModal(false)}
+        onSave={async (uri) => {
+          const savedPath = await saveMediaLocally(uri);
+          const entry = {
+            id: Date.now().toString(),
+            uri: savedPath,
+            type: 'audio',
+            timestamp: Date.now(),
+          };
+          const updated = [entry, ...media];
+          setMedia(updated);
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        }}
+      />
     </View>
   );
 }
@@ -304,7 +441,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 70,   // simulate status bar height + spacing
+    paddingTop: 70,
     paddingBottom: 0,
     position: 'relative',
   },
@@ -313,7 +450,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Inter',
     color: theme.text,
-    marginLeft: 0, // pushes it slightly right of back button
+    marginLeft: 0,
   },
   autowipe: {
     color: theme.text,
@@ -332,7 +469,8 @@ const styles = StyleSheet.create({
     marginBottom: 11,
   },
   grid: {
-    padding: 4,
+    padding: 0,
+    paddingBottom: 120,
   },
   itemContainer: {
     flex: 1 / 3,
@@ -380,5 +518,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: -25,
     top: 10,
+  },
+  videoThumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  videoWrapper: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+  playIcon: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -16 }, { translateY: -16 }],
+    backgroundColor: 'rgba(0,0,0,0)',
+    borderRadius: 20,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

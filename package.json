@@ -4,12 +4,13 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@expo/vector-icons": "^14.1.0",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^7.3.13",
     "@react-navigation/native": "^7.1.9",
     "@react-navigation/native-stack": "^7.3.13",
@@ -22,6 +23,7 @@
     "expo-camera": "~16.1.6",
     "expo-constants": "~17.1.6",
     "expo-crypto": "~14.1.4",
+    "expo-document-picker": "~13.1.5",
     "expo-file-system": "~18.1.10",
     "expo-haptics": "~14.1.4",
     "expo-image-picker": "~16.1.4",
@@ -51,7 +53,8 @@
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
     "uuid": "^11.1.0",
-    "expo-document-picker": "~13.1.5"
+    "@react-native-community/slider": "4.5.6",
+    "expo-device": "~7.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
