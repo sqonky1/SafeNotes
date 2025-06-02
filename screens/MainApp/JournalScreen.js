@@ -343,6 +343,37 @@ export default function JournalScreen() {
     }
   };
 
+  const handleDeleteAll = () => {
+    if (media.length === 0) {
+      Alert.alert('Nothing to delete', 'Your journal is already empty.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete all media?',
+      'This will permanently delete all journal entries. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              for (const item of media) {
+                await FileSystem.deleteAsync(item.uri, { idempotent: true });
+              }
+              setMedia([]);
+              await AsyncStorage.removeItem(STORAGE_KEY);
+            } catch (e) {
+              Alert.alert('Error', 'Failed to delete all media.');
+              console.warn('Failed bulk delete:', e);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -353,7 +384,13 @@ export default function JournalScreen() {
       <Text style={styles.autowipe}>
         Auto-wipe: {autoWipeTTL === 'never' ? 'Never' : 'Every ' + autoWipeTTL}
       </Text>
-      <Text style={styles.subtext}>Audio max 60s • Video max 30s</Text>
+
+      <View style={styles.subRow}>
+        <Text style={styles.subtext}>Audio max 60s • Video max 30s</Text>
+        <TouchableOpacity onPress={handleDeleteAll}>
+          <Text style={styles.deleteAllText}>Delete All</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={media}
@@ -538,5 +575,18 @@ const styles = StyleSheet.create({
     padding: 6,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  subRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingHorizontal: 5,
+    marginBottom: 11,
+  },
+  deleteAllText: {
+    color: theme.danger,
+    fontSize: 16,
+    fontFamily: 'Inter',
+    fontWeight: '500',
   },
 });
