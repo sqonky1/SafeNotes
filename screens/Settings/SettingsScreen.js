@@ -6,6 +6,9 @@ import {
   Switch,
   TouchableOpacity,
   ScrollView,
+  SafeAreaView,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { theme } from '../../constants/colors';
 import BackButton from '../../components/UI/BackButton';
@@ -54,99 +57,107 @@ export default function SettingsScreen() {
   const [showTTLModal, setShowTTLModal] = useState(false);
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <BackButton style={styles.backButton} />
-          <Text style={styles.title}>Settings</Text>
-        </View>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <ScrollView style={styles.container}>
+          <View style={styles.header}>
+            <BackButton style={styles.backButton} />
+            <Text style={styles.title}>Settings</Text>
+          </View>
 
-        {/* PRIVACY */}
-        <Text style={styles.sectionTitle}>Privacy</Text>
-        <View style={styles.group}>
-          <SettingRow label="Update access PIN" onPress={() => setShowPinModal(true)} />
-          <ValueRow
-            label="Auto-wipe settings"
-            value={autoWipeTTL === 'never' ? 'Never' : autoWipeTTL}
-            onPress={() => setShowTTLModal(true)}
-          />
-          <ToggleRow
-            label="Enable location tracking"
-            value={locationEnabled}
-            onValueChange={(val) => {
-              setLocationEnabled(val);
-              SecureStore.setItemAsync('locationEnabled', val.toString());
-            }}
-          />
-          <ToggleRow
-            label="Enable camera access"
-            value={cameraEnabled}
-            onValueChange={(val) => {
-              setCameraEnabled(val);
-              SecureStore.setItemAsync('cameraEnabled', val.toString());
-            }}
-          />
-          <ToggleRow
-            label="Enable microphone access"
-            value={micEnabled}
-            onValueChange={(val) => {
-              setMicEnabled(val);
-              SecureStore.setItemAsync('micEnabled', val.toString());
-            }}
-          />
-          <ToggleRow
-            label="Enable media gallery access"
-            value={galleryEnabled}
-            onValueChange={(val) => {
-              setGalleryEnabled(val);
-              SecureStore.setItemAsync('galleryEnabled', val.toString());
-            }}
-            last
-          />
-        </View>
+          {/* PRIVACY */}
+          <Text style={styles.sectionTitle}>Privacy</Text>
+          <View style={styles.group}>
+            <SettingRow label="Update access PIN" onPress={() => setShowPinModal(true)} />
+            <ValueRow
+              label="Auto-wipe settings"
+              value={autoWipeTTL === 'never' ? 'Never' : autoWipeTTL}
+              onPress={() => setShowTTLModal(true)}
+            />
+            <ToggleRow
+              label="Enable location tracking"
+              value={locationEnabled}
+              onValueChange={(val) => {
+                setLocationEnabled(val);
+                SecureStore.setItemAsync('locationEnabled', val.toString());
+              }}
+            />
+            <ToggleRow
+              label="Enable camera access"
+              value={cameraEnabled}
+              onValueChange={(val) => {
+                setCameraEnabled(val);
+                SecureStore.setItemAsync('cameraEnabled', val.toString());
+              }}
+            />
+            <ToggleRow
+              label="Enable microphone access"
+              value={micEnabled}
+              onValueChange={(val) => {
+                setMicEnabled(val);
+                SecureStore.setItemAsync('micEnabled', val.toString());
+              }}
+            />
+            <ToggleRow
+              label="Enable media gallery access"
+              value={galleryEnabled}
+              onValueChange={(val) => {
+                setGalleryEnabled(val);
+                SecureStore.setItemAsync('galleryEnabled', val.toString());
+              }}
+              last
+            />
+          </View>
 
-        {/* SAFETY */}
-        <Text style={styles.sectionTitle}>Safety</Text>
-        <View style={styles.group}>
-          <SettingRow
-            label="Edit emergency message"
-            onPress={() => setShowMessageModal(true)}
-          />
-          <SettingRow 
-            label="Change emergency contact" 
-            onPress={() => setShowContactModal(true)} 
-            last
-          />
-        </View>
-      </ScrollView>
+          {/* SAFETY */}
+          <Text style={styles.sectionTitle}>Safety</Text>
+          <View style={styles.group}>
+            <SettingRow
+              label="Edit emergency message"
+              onPress={() => setShowMessageModal(true)}
+            />
+            <SettingRow 
+              label="Change emergency contact" 
+              onPress={() => setShowContactModal(true)} 
+              last
+            />
+          </View>
+        </ScrollView>
 
-      <EditMessageModal
-        visible={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        currentMessage={emergencyMessage}
-        onSave={setEmergencyMessage}
-      />
+        <EditMessageModal
+          visible={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          currentMessage={emergencyMessage}
+          onSave={setEmergencyMessage}
+        />
 
-      <EditContactModal
-        visible={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        currentContact={emergencyContact}
-        onSave={setEmergencyContact}
-      />
+        <EditContactModal
+          visible={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          currentContact={emergencyContact}
+          onSave={setEmergencyContact}
+        />
 
-      <ChangePinModal
-        visible={showPinModal}
-        onClose={() => setShowPinModal(false)}
-        onSave={setAccessPin}
-      />
+        <ChangePinModal
+          visible={showPinModal}
+          onClose={() => setShowPinModal(false)}
+          onSave={setAccessPin}
+        />
 
-      <SelectTTLModal
-        visible={showTTLModal}
-        onClose={() => setShowTTLModal(false)}
-        currentTTL={autoWipeTTL}
-        onSave={setAutoWipeTTL}
-      />
-    </View>
+        <SelectTTLModal
+          visible={showTTLModal}
+          onClose={() => setShowTTLModal(false)}
+          currentTTL={autoWipeTTL}
+          onSave={setAutoWipeTTL}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -195,7 +206,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 70,   // simulate status bar height + spacing
+    paddingTop: 20,   // simulate status bar height + spacing
     paddingBottom: 0,
     position: 'relative',
   },
@@ -242,7 +253,7 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: -25,
-    top: 10,
+    top: -40,
   },
   valueText: {
     fontSize: 17,

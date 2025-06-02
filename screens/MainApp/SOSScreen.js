@@ -10,6 +10,9 @@ import {
   ScrollView,
   BackHandler,
   Alert,
+  SafeAreaView,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SettingsContext } from '../../contexts/SettingsContext';
@@ -211,257 +214,269 @@ export default function SOSScreen() {
         // Screen is being blurred (navigated away)
         // Save settings here
         setEmergencyMessage(message);
-        if (includeLocation !== locationEnabled) {
-          setLocationEnabled(includeLocation);
+
+        // Only persist if user turned ON sharing in SOS while global was OFF
+        if (includeLocation && !locationEnabled) {
+          setLocationEnabled(true);
         }
       };
     }, [message, includeLocation])
   );
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={async () => {
-            await setEmergencyMessage(message);
-            navigation.goBack();
-          }}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={32} color={theme.text} />
-        </TouchableOpacity>
-        <Text style={styles.title}>SOS</Text>
-      </View>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+        <ScrollView style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.leftColumn}>
+              <TouchableOpacity
+                onPress={async () => {
+                  await setEmergencyMessage(message);
+                  navigation.goBack();
+                }}
+                style={styles.backButton}
+              >
+                <Ionicons name="chevron-back" size={32} color={theme.text} />
+              </TouchableOpacity>
+              <Text style={styles.title}>SOS</Text>
+            </View>
+          </View>
 
-      <Text style={styles.sectionTitle}>Message</Text>
-      <TextInput
-        style={styles.textInput}
-        multiline
-        value={message}
-        onChangeText={(val) => {
-          setMessage(val);
-        }}
-      />
+          <Text style={styles.sectionTitle}>Message</Text>
+          <TextInput
+            style={styles.textInput}
+            multiline
+            value={message}
+            onChangeText={(val) => {
+              setMessage(val);
+            }}
+          />
 
-      <Text style={styles.sectionTitle}>Location</Text>
-      <TouchableOpacity onPress={handleLocationToggle} style={styles.row}>
-        {includeLocation ? (
-          <Ionicons name="checkbox" size={20} color={theme.accent} />
-        ) : (
-          <View style={styles.emptyBox} />
-        )}
-        <Text style={styles.rowText}>  Share my current location</Text>
-      </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Location</Text>
+          <TouchableOpacity onPress={handleLocationToggle} style={styles.row}>
+            {includeLocation ? (
+              <Ionicons name="checkbox" size={20} color={theme.accent} />
+            ) : (
+              <View style={styles.emptyBox} />
+            )}
+            <Text style={styles.rowText}>  Share my current location</Text>
+          </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Share Media</Text>
+          <Text style={styles.sectionTitle}>Share Media</Text>
 
-      <TouchableOpacity onPress={() => setShowMediaPicker(true)} style={styles.selectBtn}>
-        <Text style={styles.rowText}>Select media from Journal        {mediaSelected.length} selected</Text>
-      </TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowMediaPicker(true)} style={styles.selectBtn}>
+            <Text style={styles.rowText}>Select media from Journal        {mediaSelected.length} selected</Text>
+          </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Choose Recipients</Text>
-      <Text style={styles.subText}>Disclaimer: This app is not affiliated with SPF.</Text>
+          <Text style={styles.sectionTitle}>Choose Recipients</Text>
+          <Text style={styles.subText}>Disclaimer: This app is not affiliated with SPF.</Text>
 
-      <TouchableOpacity onPress={() => setRecipient('emergency')} style={styles.row}>
-        <Ionicons name={recipient === 'emergency' ? 'radio-button-on' : 'radio-button-off'} size={22} color={theme.text} />
-          <Text style={styles.rowText}>
-            Emergency Contact ({emergencyContact?.name || 'Not Set'})
-          </Text>
-        <TouchableOpacity
-          onPress={() => setShowContactModal(true)}
-          style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 6 }}
-        >
-          <Text style={{ color: theme.accent, marginLeft: 4, fontFamily: 'Inter', fontSize: 16 }}>[Edit]</Text>
-        </TouchableOpacity>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          if (!includeLocation) {
-            Alert.alert(
-              'Location Required',
-              'IMPORTANT: Location sharing MUST be on to comply with SPF regulations.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Share my location',
-                  onPress: () => {
-                    if (!locationEnabled) {
-                      Alert.alert(
-                        'Location Services Disabled',
-                        'Location tracking is off in Settings. Enable it to share your current location.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Turn On',
-                            onPress: async () => {
-                              await setLocationEnabled(true);
-                              setIncludeLocation(true);
-                              setRecipient('spf');
-                            },
-                          },
-                        ]
-                      );
-                    } else {
-                      setIncludeLocation(true);
-                      setRecipient('spf');
-                    }
-                  },
-                },
-              ]
-            );
-          } else {
-            setRecipient('spf');
-          }
-        }}
-        style={styles.row}
-      >
-        <Ionicons
-          name={recipient === 'spf' ? 'radio-button-on' : 'radio-button-off'}
-          size={22}
-          color={includeLocation ? theme.text : theme.muted}
-        />
-        <Text style={[styles.rowText, { color: includeLocation ? theme.text : theme.muted }]}>
-          {'  '}Singapore Police Force (70999)
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
-          if (recipient === 'spf') {
-            setConfirmSPF(!confirmSPF);
-          }
-        }}
-        style={[styles.row, styles.spfCheckboxRow]}
-        activeOpacity={recipient === 'spf' ? 0.8 : 1} // no feedback unless SPF
-      >
-        <View style={styles.checkboxWrapper}>
-          {confirmSPF ? (
-            <Ionicons
-              name="checkbox"
-              size={18}
-              color={recipient === 'spf' ? theme.accent : theme.muted}
-            />
-          ) : (
-            <View
-              style={[
-                styles.emptyBoxSPF,
-                { borderColor: recipient === 'spf' ? theme.text : theme.muted }
-              ]}
-            />
-          )}
-        </View>
-        <Text
-          style={[
-            styles.confirmText,
-            { color: recipient === 'spf' ? theme.text : theme.muted }
-          ]}
-        >
-          <Text style={{ fontWeight: 'bold' }}>
-            I understand that 70999 is for EMERGENCIES only,
-          </Text>{' '}
-          when calling ‘999’ is unsafe or not possible.
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.sendBtn, { opacity: recipient ? 1 : 0.6 }]}
-        onPress={handleSendSOS}
-        disabled={!recipient}
-      >
-        <Text style={styles.sendText}>Send SOS</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.subText}>Your SOS will be sent via SMS.
-        {' '}
-        Location and media are shared as links. 
-        {' '}
-        The media link expires in about 24h.</Text>
-      <TouchableOpacity onPress={() => setShowDeleteHelpModal(true)}>
-        <Text style={styles.linkText}>How to delete an SMS message for yourself</Text>
-      </TouchableOpacity>
-
-      <EditContactModal
-        visible={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        currentContact={emergencyContact}
-        onSave={(updatedContact) => {
-          setEmergencyContact(updatedContact); // ✅ this updates the display
-          setShowContactModal(false);
-        }}
-      />
-      <Modal visible={showDeleteHelpModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <ScrollView style={{ maxHeight: 300 }}>
-              <Text style={styles.modalText}>
-                This is a placeholder tutorial on how to delete an SMS:
-                {'\n\n'}1. Open your Messages app.
-                {'\n'}2. Long press on the SOS message you just sent.
-                {'\n'}3. Tap “Delete” or the trash bin icon.
-                {'\n\n'}This helps protect your privacy if you are using a shared or monitored device.
+          <TouchableOpacity onPress={() => setRecipient('emergency')} style={styles.row}>
+            <Ionicons name={recipient === 'emergency' ? 'radio-button-on' : 'radio-button-off'} size={22} color={theme.text} />
+              <Text style={styles.rowText}>
+                {'  '}Emergency Contact ({emergencyContact?.name || 'Not Set'})
               </Text>
-            </ScrollView>
-            <TouchableOpacity onPress={() => setShowDeleteHelpModal(false)}>
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      <MediaPickerModal
-        visible={showMediaPicker}
-        onClose={() => setShowMediaPicker(false)}
-        onConfirm={(selected) => {
-          setMediaSelected(selected);
-          setShowMediaPicker(false);
-        }}
-      />
-      
-      {/* Reminder to delete SMS */}
-      <Modal visible={showDeleteReminder} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalText}>
-              Reminder: You may want to delete the SOS from your Messages app for yourself.
-            </Text>
-            <TouchableOpacity onPress={() => {
-              setShowDeleteReminder(false);
-              setShowSentConfirmation(true);
-            }}>
-              <Text style={styles.buttonText}>Dismiss</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Confirmation and return */}
-      <Modal visible={showSentConfirmation} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalText}>
-              SOS sent. Help is on the way, and you are not alone.{"\n\n"}Returning to your Notes...
-            </Text>
-            <TouchableOpacity 
-              onPress={() => {
-                setShowSentConfirmation(false);
-                setIsUnlocked(false); // This triggers RootNavigator to rerender with disguise routes
-
-                // Delay navigation so the stack is re-mounted first
-                setTimeout(() => {
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'NotesHome' }],
-                  });
-                }, 100); // slight delay to allow re-mount
-              }}
+            <TouchableOpacity
+              onPress={() => setShowContactModal(true)}
+              style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 6 }}
             >
-              <Text style={styles.buttonText}>OK</Text>
+              <Text style={{ color: theme.accent, marginLeft: 4, fontFamily: 'Inter', fontSize: 16 }}>[Edit]</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </ScrollView>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              if (!includeLocation) {
+                Alert.alert(
+                  'Location Required',
+                  'IMPORTANT: Location sharing MUST be on to comply with SPF regulations.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Share my location',
+                      onPress: () => {
+                        if (!locationEnabled) {
+                          Alert.alert(
+                            'Location Services Disabled',
+                            'Location tracking is off in Settings. Enable it to share your current location.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Turn On',
+                                onPress: async () => {
+                                  await setLocationEnabled(true);
+                                  setIncludeLocation(true);
+                                  setRecipient('spf');
+                                },
+                              },
+                            ]
+                          );
+                        } else {
+                          setIncludeLocation(true);
+                          setRecipient('spf');
+                        }
+                      },
+                    },
+                  ]
+                );
+              } else {
+                setRecipient('spf');
+              }
+            }}
+            style={styles.row}
+          >
+            <Ionicons
+              name={recipient === 'spf' ? 'radio-button-on' : 'radio-button-off'}
+              size={22}
+              color={includeLocation ? theme.text : theme.muted}
+            />
+            <Text style={[styles.rowText, { color: includeLocation ? theme.text : theme.muted }]}>
+              {'  '}Singapore Police Force (70999)
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              if (recipient === 'spf') {
+                setConfirmSPF(!confirmSPF);
+              }
+            }}
+            style={[styles.row, styles.spfCheckboxRow]}
+            activeOpacity={recipient === 'spf' ? 0.8 : 1} // no feedback unless SPF
+          >
+            <View style={styles.checkboxWrapper}>
+              {confirmSPF ? (
+                <Ionicons
+                  name="checkbox"
+                  size={18}
+                  color={recipient === 'spf' ? theme.accent : theme.muted}
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.emptyBoxSPF,
+                    { borderColor: recipient === 'spf' ? theme.text : theme.muted }
+                  ]}
+                />
+              )}
+            </View>
+            <Text
+              style={[
+                styles.confirmText,
+                { color: recipient === 'spf' ? theme.text : theme.muted }
+              ]}
+            >
+              <Text style={{ fontWeight: 'bold' }}>
+                I understand that 70999 is for EMERGENCIES only,
+              </Text>{' '}
+              when calling ‘999’ is unsafe or not possible.
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.sendBtn, { opacity: recipient ? 1 : 0.6 }]}
+            onPress={handleSendSOS}
+            disabled={!recipient}
+          >
+            <Text style={styles.sendText}>Send SOS</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.subText}>Your SOS will be sent via SMS.
+            {' '}
+            Location and media are shared as links. 
+            {' '}
+            The media link expires in about 24h.</Text>
+          <TouchableOpacity onPress={() => setShowDeleteHelpModal(true)}>
+            <Text style={styles.linkText}>How to delete an SMS message for yourself</Text>
+          </TouchableOpacity>
+
+          <EditContactModal
+            visible={showContactModal}
+            onClose={() => setShowContactModal(false)}
+            currentContact={emergencyContact}
+            onSave={(updatedContact) => {
+              setEmergencyContact(updatedContact); // ✅ this updates the display
+              setShowContactModal(false);
+            }}
+          />
+          <Modal visible={showDeleteHelpModal} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <ScrollView style={{ maxHeight: 300 }}>
+                  <Text style={styles.modalText}>
+                    This is a placeholder tutorial on how to delete an SMS:
+                    {'\n\n'}1. Open your Messages app.
+                    {'\n'}2. Long press on the SOS message you just sent.
+                    {'\n'}3. Tap “Delete” or the trash bin icon.
+                    {'\n\n'}This helps protect your privacy if you are using a shared or monitored device.
+                  </Text>
+                </ScrollView>
+                <TouchableOpacity onPress={() => setShowDeleteHelpModal(false)}>
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+          <MediaPickerModal
+            visible={showMediaPicker}
+            onClose={() => setShowMediaPicker(false)}
+            onConfirm={(selected) => {
+              setMediaSelected(selected);
+              setShowMediaPicker(false);
+            }}
+          />
+          
+          {/* Reminder to delete SMS */}
+          <Modal visible={showDeleteReminder} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <Text style={styles.modalText}>
+                  Reminder: You may want to delete the SOS from your Messages app for yourself.
+                </Text>
+                <TouchableOpacity onPress={() => {
+                  setShowDeleteReminder(false);
+                  setShowSentConfirmation(true);
+                }}>
+                  <Text style={styles.buttonText}>Dismiss</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Confirmation and return */}
+          <Modal visible={showSentConfirmation} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <Text style={styles.modalText}>
+                  SOS sent. Help is on the way, and you are not alone.{"\n\n"}Returning to your Notes...
+                </Text>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setShowSentConfirmation(false);
+                    setIsUnlocked(false); // This triggers RootNavigator to rerender with disguise routes
+
+                    // Delay navigation so the stack is re-mounted first
+                    setTimeout(() => {
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'NotesHome' }],
+                      });
+                    }, 100); // slight delay to allow re-mount
+                  }}
+                >
+                  <Text style={styles.buttonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -470,37 +485,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.background,
     paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingTop: 30,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: 'left',
+    paddingTop: 10,   // simulate status bar height + spacing
+    paddingBottom: 0,
+    position: 'relative',
   },
   backButton: {
-    padding: 8,       // add padding for better touch response
+    padding: 0, 
+    left: -5,      // add padding for better touch response
     marginRight: 12,
   },
+  leftColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
   title: {
-    fontSize: 45,
+    fontSize: 55,
     fontWeight: 'bold',
     fontFamily: 'Inter',
     color: theme.text,
   },
   sectionTitle: {
-    fontSize: 18,
-    marginTop: 20,
     color: theme.text,
+    fontSize: 22,
+    fontWeight: 'bold',
     fontFamily: 'Inter',
+    marginTop: 11,
+    marginBottom: 5,
   },
   textInput: {
     backgroundColor: theme.card, // slightly darker (e.g. #4A4A4A)
     color: theme.text,
     padding: 12,
     borderRadius: 10,
-    marginTop: 8,
+    marginTop: 6,
+    marginBottom: 6,
     fontFamily: 'Inter',
-    height: 100,
+    height: 70,
     textAlignVertical: 'top',
     borderWidth: 1,
     borderColor: theme.highlight, // subtle outline
@@ -508,7 +533,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 6,
+    marginBottom: 8,
   },
   rowText: {
     color: theme.text,
@@ -519,18 +545,20 @@ const styles = StyleSheet.create({
     backgroundColor: theme.input,
     padding: 12,
     borderRadius: 10,
-    marginTop: 8,
+    marginTop: 6,
+    marginBottom: 8,
   },
   sendBtn: {
     backgroundColor: theme.danger,
-    marginTop: 30,
+    marginTop: 20,
+    marginBottom: 10,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
   },
   sendText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     fontFamily: 'Inter',
   },
@@ -538,14 +566,14 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: theme.muted,
     fontSize: 13,
-    marginTop: 6,
+    marginBottom: 6,
     fontFamily: 'Inter',
   },
   linkText: {
     textAlign: 'left',
     color: theme.accent,
     fontSize: 13,
-    marginTop: 10,
+    marginTop: 6,
     textDecorationLine: 'underline',
     fontFamily: 'Inter',
   },
@@ -590,8 +618,8 @@ const styles = StyleSheet.create({
   },
 
   emptyBoxSPF: {
-    width: 18,
-    height: 18,
+    width: 17,
+    height: 17,
     borderWidth: 2,
     borderColor: theme.text,
     borderRadius: 4,

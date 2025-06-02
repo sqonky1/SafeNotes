@@ -10,6 +10,8 @@ import {
   Image,
   Platform,
   Alert,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../constants/colors';
@@ -375,96 +377,104 @@ export default function JournalScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <BackButton style={styles.backButton} />
-        <Text style={styles.title}>Journal</Text>
-      </View>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <BackButton style={styles.backButton} />
+          <Text style={styles.title}>Journal</Text>
+        </View>
 
-      <Text style={styles.autowipe}>
-        Auto-wipe: {autoWipeTTL === 'never' ? 'Never' : 'Every ' + autoWipeTTL}
-      </Text>
+        <Text style={styles.autowipe}>
+          Auto-wipe: {autoWipeTTL === 'never' ? 'Never' : 'Every ' + autoWipeTTL}
+        </Text>
 
-      <View style={styles.subRow}>
-        <Text style={styles.subtext}>Audio max 60s • Video max 30s</Text>
-        <TouchableOpacity onPress={handleDeleteAll}>
-          <Text style={styles.deleteAllText}>Delete All</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.subRow}>
+          <Text style={styles.subtext}>Audio max 60s • Video max 30s</Text>
+          <TouchableOpacity onPress={handleDeleteAll}>
+            <Text style={styles.deleteAllText}>Delete All</Text>
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={media}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={3}
-        contentContainerStyle={styles.grid}
-        overScrollMode="never" // 👈 PREVENTS BOUNCE-CRASH on Android
-      />
+        <FlatList
+          data={media}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={3}
+          contentContainerStyle={styles.grid}
+          overScrollMode="never" // 👈 PREVENTS BOUNCE-CRASH on Android
+        />
 
-      <View style={styles.fabContainer}>
-        <TouchableOpacity
-          style={[
-            styles.fab,
-            { backgroundColor: micEnabled ? theme.accent : '#555' },
-          ]}
-          onPress={() => {
-            if (!micEnabled) {
-              showPermissionDialog('Microphone');
-              return;
-            }
+        <View style={styles.fabContainer}>
+          <TouchableOpacity
+            style={[
+              styles.fab,
+              { backgroundColor: micEnabled ? theme.accent : '#555' },
+            ]}
+            onPress={() => {
+              if (!micEnabled) {
+                showPermissionDialog('Microphone');
+                return;
+              }
 
-            if (isExpoGo) {
-              Alert.alert(
-                'Notice',
-                'Expo Go cannot record audio.\nUse a custom dev build/emulator to test this feature.'
-              );
-              return;
-            }
+              if (isExpoGo) {
+                Alert.alert(
+                  'Notice',
+                  'Expo Go cannot record audio.\nUse a custom dev build/emulator to test this feature.'
+                );
+                return;
+              }
 
-            setShowMicModal(true);
+              setShowMicModal(true);
+            }}
+          >
+            <AudioLines color="#fff" size={30} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.fab,
+              { backgroundColor: cameraEnabled ? theme.accent : '#555' },
+            ]}
+            onPress={handleCameraCapture}
+          >
+            <Camera color="#fff" size={30} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.fab,
+              { backgroundColor: galleryEnabled ? theme.accent : '#555' },
+            ]}
+            onPress={handleGalleryUpload}
+          >
+            <ImageIcon color="#fff" size={30} />
+          </TouchableOpacity>
+        </View>
+
+        <AudioRecordModal
+          visible={showMicModal}
+          onClose={() => setShowMicModal(false)}
+          onSave={async (uri) => {
+            const savedPath = await saveMediaLocally(uri);
+            const entry = {
+              id: Date.now().toString(),
+              uri: savedPath,
+              type: 'audio',
+              timestamp: Date.now(),
+            };
+            const updated = [entry, ...media];
+            setMedia(updated);
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
           }}
-        >
-          <AudioLines color="#fff" size={30} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.fab,
-            { backgroundColor: cameraEnabled ? theme.accent : '#555' },
-          ]}
-          onPress={handleCameraCapture}
-        >
-          <Camera color="#fff" size={30} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.fab,
-            { backgroundColor: galleryEnabled ? theme.accent : '#555' },
-          ]}
-          onPress={handleGalleryUpload}
-        >
-          <ImageIcon color="#fff" size={30} />
-        </TouchableOpacity>
+        />
       </View>
-
-      <AudioRecordModal
-        visible={showMicModal}
-        onClose={() => setShowMicModal(false)}
-        onSave={async (uri) => {
-          const savedPath = await saveMediaLocally(uri);
-          const entry = {
-            id: Date.now().toString(),
-            uri: savedPath,
-            type: 'audio',
-            timestamp: Date.now(),
-          };
-          const updated = [entry, ...media];
-          setMedia(updated);
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        }}
-      />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -478,7 +488,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 70,
+    paddingTop: 20,
     paddingBottom: 0,
     position: 'relative',
   },
@@ -554,7 +564,7 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: -25,
-    top: 10,
+    top: -40,
   },
   videoThumbnail: {
     width: '100%',

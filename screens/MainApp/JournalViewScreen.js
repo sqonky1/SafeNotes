@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  Platform,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -144,38 +147,46 @@ export default function JournalViewScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <ChevronLeft color={theme.text} size={36} />
-      </TouchableOpacity>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={styles.container}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <ChevronLeft color={theme.text} size={36} />
+        </TouchableOpacity>
 
-      <FlatList
-        ref={flatListRef}
-        data={mediaItems}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(newIndex);
-        }}
-        renderItem={renderItem}
-        style={{ flex: 1 }}
-        getItemLayout={(_, index) => ({
-          length: width,
-          offset: width * index,
-          index,
-        })}
-      />
+        <FlatList
+          ref={flatListRef}
+          data={mediaItems}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) => {
+            const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+            setCurrentIndex(newIndex);
+          }}
+          renderItem={renderItem}
+          style={{ flex: 1 }}
+          getItemLayout={(_, index) => ({
+            length: width,
+            offset: width * index,
+            index,
+          })}
+        />
 
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Trash2 color="#fff" size={24} />
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Trash2 color="#fff" size={24} />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -193,7 +204,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 60,
+    top: 40,
     left: 24,
     zIndex: 10,
   },
@@ -202,15 +213,16 @@ const styles = StyleSheet.create({
     height: height,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 100,
   },
   media: {
     width: width,
-    height: height * 0.7,
+    height: height * 0.65,
     resizeMode: 'contain',
   },
   audioPlaceholder: {
     width: width,
-    height: height * 0.7,
+    height: height * 0.65,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.card,
