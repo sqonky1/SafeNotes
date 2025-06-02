@@ -12,6 +12,10 @@ import {
 } from 'react-native';
 import { OnboardingContext } from '../../contexts/OnboardingContext';
 
+import { theme } from '../../constants/colors'; // Make sure this is at the top
+
+import { ShieldUser } from 'lucide-react-native';
+
 export default function SetupCompleteScreen({ navigation /* no onFinish prop needed */ }) {
   // Grab every single piece from context
   const {
@@ -62,14 +66,12 @@ export default function SetupCompleteScreen({ navigation /* no onFinish prop nee
         <Text style={styles.heading}>You’re All Set</Text>
 
         {/* Shield Icon */}
-        <Image
-          source={require('../../assets/shield.png')} // or whatever your asset is named
-          style={styles.iconImage}
-          resizeMode="contain"
-        />
+        <ShieldUser color={theme.text} size={150} strokeWidth={1.5}/>
 
+        <Text style={styles.liveText}>
+          {'\n'}Your disguise is now live.{'\n'}
+        </Text>
         <Text style={styles.subText}>
-          Your disguise is now live.{'\n\n'}
           SafeNotes will appear as a normal notes app on your device, until unlocked.
         </Text>
 
@@ -80,36 +82,75 @@ export default function SetupCompleteScreen({ navigation /* no onFinish prop nee
         >
           <Text style={styles.launchButtonText}>Launch App</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+          <Text style={styles.goBackText}>Go back</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  outerContainer: { flex: 1, backgroundColor: '#000' },
-  innerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
-  heading: {
-    color: '#fff',
-    fontSize: 36,
-    fontWeight: '700',
-    marginBottom: 24,
-    textAlign: 'center',
+  outerContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
   },
-  iconImage: { width: 100, height: 100, marginBottom: 24 },
+  innerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  heading: {
+    color: theme.text,
+    fontSize: 32,
+    fontFamily: 'Inter',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  iconImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 24,
+  },
+  liveText: {
+    color: theme.text,
+    fontSize: 1,
+    fontFamily: 'Inter',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 24,
+  },
   subText: {
-    color: '#ddd',
-    fontSize: 16,
+    color: theme.muted,
+    fontSize: 1,
+    fontFamily: 'Inter',
+    fontSize: 18,
     textAlign: 'center',
     marginBottom: 40,
     lineHeight: 24,
   },
   launchButton: {
-    width: '80%',
+    width: 200,
     height: 50,
-    backgroundColor: '#4181D4',
-    borderRadius: 8,
+    borderRadius: 10,
+    backgroundColor: theme.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  launchButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  launchButtonText: {
+    color: theme.text,
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'Inter',
+  },
+  goBackText: {
+    color: theme.accent,
+    fontSize: 18,
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginTop: 20,  },
 });

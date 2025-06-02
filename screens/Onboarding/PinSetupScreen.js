@@ -10,22 +10,23 @@ import {
   Platform,
 } from 'react-native';
 
-// ← Make sure you point this to your onboarding context:
 import { OnboardingContext } from '../../contexts/OnboardingContext';
+import { theme } from '../../constants/colors';
+import { Feather } from '@expo/vector-icons'; // or use Ionicons
 
-// A simple backspace icon (Unicode)
 const BackspaceIcon = () => (
   <Text style={{ color: '#fff', fontSize: 24, fontWeight: '600' }}>⌫</Text>
 );
 
 export default function PinSetupScreen({ navigation, onFinish }) {
-  // Pull pin & confirmPin out of context:
   const { pin, confirmPin, setField } = useContext(OnboardingContext);
 
   const [isMatching, setIsMatching] = useState(false);
-  const [activeField, setActiveField] = useState('pin'); // either 'pin' or 'confirm'
+  const [activeField, setActiveField] = useState('pin');
 
-  // Whenever pin or confirmPin change, check if they're both length 4 and match
+  const [showPin, setShowPin] = useState(false);
+  const [showConfirmPin, setShowConfirmPin] = useState(false);
+
   useEffect(() => {
     if (
       pin.length === 4 &&
@@ -38,7 +39,6 @@ export default function PinSetupScreen({ navigation, onFinish }) {
     }
   }, [pin, confirmPin]);
 
-  // Called when you tap a digit (0–9); appends to whichever field is active
   const handleDigitPress = (digit) => {
     if (activeField === 'pin') {
       if (pin.length < 4) {
@@ -51,7 +51,6 @@ export default function PinSetupScreen({ navigation, onFinish }) {
     }
   };
 
-  // Called when you tap the backspace (“⌫”) key
   const handleBackspace = () => {
     if (activeField === 'pin') {
       setField('pin', pin.slice(0, -1));
@@ -60,40 +59,34 @@ export default function PinSetupScreen({ navigation, onFinish }) {
     }
   };
 
-  // Called when “Save” is tapped (only enabled if isMatching === true)
   const handleSave = () => {
-    // You could store PIN in SecureStore here if you want.
-    // For now, simply navigate onward and call onFinish()
-    navigation.replace('ConfigureSOS');
+    console.log('Collected PIN:', pin);
+    navigation.navigate('ConfigureSOS');
     onFinish && onFinish();
   };
 
-  //
-  // CONSTANTS FOR EXACT KEYPAD SIZE (328 × 358)
-  //
-  const KEY_WIDTH = 104;   // each key’s width
-  const KEY_HEIGHT = 85;   // each key’s height
-  const H_GAP = 8;         // horizontal gap between keys
+  const KEY_WIDTH = 104;
+  const KEY_HEIGHT = 85;
+  const H_GAP = 8;
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.select({ ios: 'padding', android: undefined })}
     >
-      {/* ───────── Heading ───────── */}
-      <Text style={styles.heading}>Set Your 4-Digit Unlock PIN</Text>
+      <Text style={styles.heading}>
+        Set Your 4-Digit{"\n"}
+        Unlock PIN
+      </Text>
 
-      {/* ───────── Subtitle ───────── */}
       <Text style={styles.subtitle}>
         This PIN will be entered into the calculator to unlock SafeNotes.
       </Text>
 
-      {/* ───────── Helper text ───────── */}
       <Text style={styles.helperText}>
         Make sure it’s easy for you to remember, but hard for others to guess.
       </Text>
 
-      {/* ───────── PIN fields (stacked) ───────── */}
       <View style={styles.fieldsContainer}>
         {/* PIN field */}
         <TouchableOpacity
@@ -104,9 +97,20 @@ export default function PinSetupScreen({ navigation, onFinish }) {
             activeField === 'pin' && styles.fieldFocused,
           ]}
         >
-          <Text style={pin ? styles.pinFieldText : styles.placeholderText}>
-            {pin ? '•'.repeat(pin.length) : 'Enter 4-Digit PIN'}
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={pin ? styles.pinFieldText : styles.placeholderText}>
+              {pin ? (showPin ? pin : '•'.repeat(pin.length)) : 'Enter 4-Digit PIN'}
+            </Text>
+            {pin.length > 0 && (
+              <TouchableOpacity onPress={() => setShowPin(!showPin)}>
+                <Feather
+                  name={showPin ? 'eye' : 'eye-off'}
+                  size={20}
+                  color={theme.muted}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </TouchableOpacity>
 
         {/* Confirm PIN field */}
@@ -118,17 +122,25 @@ export default function PinSetupScreen({ navigation, onFinish }) {
             activeField === 'confirm' && styles.fieldFocused,
           ]}
         >
-          <Text
-            style={confirmPin ? styles.pinFieldText : styles.placeholderText}
-          >
-            {confirmPin
-              ? '•'.repeat(confirmPin.length)
-              : 'Confirm 4-Digit PIN'}
-          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={confirmPin ? styles.pinFieldText : styles.placeholderText}>
+              {confirmPin
+                ? (showConfirmPin ? confirmPin : '•'.repeat(confirmPin.length))
+                : 'Confirm 4-Digit PIN'}
+            </Text>
+            {confirmPin.length > 0 && (
+              <TouchableOpacity onPress={() => setShowConfirmPin(!showConfirmPin)}>
+                <Feather
+                  name={showConfirmPin ? 'eye' : 'eye-off'}
+                  size={20}
+                  color={theme.muted}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* ───────── Number Pad (exactly 328 × 358) ───────── */}
       <View style={styles.keypadWrapper}>
         {[
           ['7', '8', '9'],
@@ -156,9 +168,7 @@ export default function PinSetupScreen({ navigation, onFinish }) {
           </View>
         ))}
 
-        {/* Bottom row: “0” spans two columns, “⌫” under the “3” */}
         <View style={styles.keypadRow}>
-          {/* “0” button: (2 × KEY_WIDTH) + one H_GAP */}
           <TouchableOpacity
             style={{
               width: KEY_WIDTH * 2 + H_GAP,
@@ -175,7 +185,6 @@ export default function PinSetupScreen({ navigation, onFinish }) {
             <Text style={styles.keyText}>0</Text>
           </TouchableOpacity>
 
-          {/* “⌫” key */}
           <TouchableOpacity
             style={[
               styles.keyButton,
@@ -193,7 +202,6 @@ export default function PinSetupScreen({ navigation, onFinish }) {
         </View>
       </View>
 
-      {/* ───────── Back & Save Buttons (150 × 50) ───────── */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, styles.backButton]}
@@ -219,127 +227,134 @@ export default function PinSetupScreen({ navigation, onFinish }) {
   );
 }
 
-// ───────────────────────────────────────────────────────────────────
-// ───────────── Stylesheet (no more V_GAP here!) ─────────────
-// ───────────────────────────────────────────────────────────────────
-const BLUE = '#4181D4';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20, // ensures the Back/Save buttons aren’t flush to bottom
+    backgroundColor: theme.background,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 24,
   },
 
-  // Heading (40px, weight 700)
   heading: {
-    color: '#fff',
-    fontSize: 40,
+    color: theme.text,
+    fontSize: 32,
+    fontFamily: 'Inter',
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 8,
   },
 
-  // Subtitle (28px, weight 300)
   subtitle: {
-    color: '#ddd',
-    fontSize: 28,
-    fontWeight: '300',
+    color: theme.text,
+    fontSize: 20,
+    fontFamily: 'Inter',
+    fontWeight: '400',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
 
-  // Helper text (16px, weight 300, 60% white)
   helperText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 16,
-    fontWeight: '300',
+    color: theme.muted,
+    fontSize: 14,
+    fontFamily: 'Inter',
     textAlign: 'center',
+    marginBottom: 14,
+  },
+
+  fieldsContainer: {
     marginBottom: 24,
   },
 
-  // Container for the two PIN fields
-  fieldsContainer: {
-    marginBottom: 16,
-  },
   pinField: {
     width: '100%',
-    height: 56,
-    borderWidth: 1.5,
-    borderColor: '#444',
+    height: 54,
+    borderWidth: 1,
+    borderColor: theme.border,
     borderRadius: 8,
+    backgroundColor: theme.input,
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     marginBottom: 12,
   },
+
   fieldFocused: {
-    borderColor: BLUE,
-  },
-  pinFieldText: {
-    color: '#fff',
-    fontSize: 22,
-    letterSpacing: 8,
-  },
-  placeholderText: {
-    color: '#666',
-    fontSize: 18,
-    fontWeight: '300',
+    borderColor: theme.accent,
   },
 
-  // Keypad wrapper forced to 328 × 358
+  pinFieldText: {
+    color: theme.text,
+    fontSize: 20,
+    fontFamily: 'Inter',
+    letterSpacing: 8,
+  },
+
+  placeholderText: {
+    color: theme.muted,
+    fontSize: 16,
+    fontFamily: 'Inter',
+  },
+
   keypadWrapper: {
     width: 328,
     height: 358,
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 24,
     justifyContent: 'center',
   },
+
   keypadRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 3, // ← previously you wrote “V_GAP/2” (6/2=3), but use literal 3
+    marginVertical: 3,
   },
+
   keyButton: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 8,
+    backgroundColor: theme.card,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    // width & height are set inline in JSX
   },
+
   keyText: {
-    color: '#fff',
-    fontSize: 24,
+    color: theme.text,
+    fontSize: 32,
+    fontFamily: 'Inter',
     fontWeight: '600',
   },
 
-  // The Back & Save row, each button is 150 × 50
   buttonContainer: {
-    width: 328,
+    marginTop: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignSelf: 'center',
+    width: 328,
   },
+
   button: {
-    width: 150,
+    width: '48%',
     height: 50,
-    borderRadius: 8,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   backButton: {
-    backgroundColor: BLUE,
+    backgroundColor: theme.highlight,
   },
+
   saveButtonEnabled: {
-    backgroundColor: BLUE,
+    backgroundColor: theme.accent,
   },
+
   saveButtonDisabled: {
-    backgroundColor: '#555',
+    backgroundColor: theme.highlight,
   },
+
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: theme.text,
+    fontSize: 18,
+    fontFamily: 'Inter',
+    fontWeight: '700',
   },
 });

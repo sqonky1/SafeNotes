@@ -29,7 +29,7 @@ export function OnboardingProvider({ children }) {
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyNumber, setEmergencyNumber] = useState('');
   const [emergencyRelationship, setEmergencyRelationship] = useState('');
-  const [shareLocationByDefault, setShareLocationByDefault] = useState(true);
+  //const [shareLocationByDefault, setShareLocationByDefault] = useState(true);
 
   // 3) Preferences toggles
   const [autoWipeChoice, setAutoWipeChoice] = useState('24h');
@@ -53,8 +53,8 @@ export function OnboardingProvider({ children }) {
         return setEmergencyNumber(value);
       case 'emergencyRelationship':
         return setEmergencyRelationship(value);
-      case 'shareLocationByDefault':
-        return setShareLocationByDefault(value);
+      //case 'shareLocationByDefault':
+        //return setShareLocationByDefault(value);
       case 'autoWipeChoice':
         return setAutoWipeChoice(value);
       case 'locationEnabled':
@@ -79,7 +79,7 @@ export function OnboardingProvider({ children }) {
         emergencyName,
         emergencyNumber,
         emergencyRelationship,
-        shareLocationByDefault,
+        //shareLocationByDefault,
         autoWipeChoice,
         locationEnabled,
         cameraEnabled,

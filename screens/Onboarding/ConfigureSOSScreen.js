@@ -11,34 +11,35 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-
-// ─── IMPORT YOUR ONBOARDING CONTEXT ─────────────────────
+import { theme } from '../../constants/colors';
 import { OnboardingContext } from '../../contexts/OnboardingContext';
 
 export default function ConfigureSOSScreen({ navigation, onFinish }) {
-  // ─── PULL FIELDS + SETTER FROM CONTEXT ─────────────────
   const {
     sosMessage,
     emergencyName,
     emergencyNumber,
     emergencyRelationship,
-    shareLocationByDefault,
     setField,
   } = useContext(OnboardingContext);
 
-  // Called when “Save” is tapped
   const handleSaveSOS = () => {
-    // (Optional) console.log the values here:
-    console.log('Collected SOS data:', {
+    const digitsOnly = emergencyNumber.replace(/\D/g, '');
+
+    if (digitsOnly && (!/^[89]/.test(digitsOnly) || digitsOnly.length !== 8)) {
+      alert('Emergency contact number must be 8 digits and start with 8 or 9.');
+      setField('emergencyNumber', '');
+      return;
+    }
+
+    console.log('Collected SOS Data:', {
       sosMessage,
       emergencyName,
-      emergencyNumber,
+      emergencyNumber: digitsOnly,
       emergencyRelationship,
-      shareLocationByDefault,
     });
 
-    // Navigate to the next onboarding screen:
-    navigation.replace('SetPreferences');
+    navigation.navigate('SetPreferences');
     onFinish && onFinish();
   };
 
@@ -51,10 +52,8 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ─── HEADING */}
-        <Text style={styles.heading}>Configure SOS Message</Text>
+        <Text style={styles.heading}>Configure SOS</Text>
 
-        {/* ─── “Message” Input */}
         <Text style={styles.sectionHeading}>Message</Text>
         <TextInput
           style={styles.textInputMulti}
@@ -65,7 +64,6 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
           placeholderTextColor="#666"
         />
 
-        {/* ─── Emergency Contact (Name / Number / Relationship) */}
         <Text style={styles.sectionHeading}>Emergency Contact (Optional)</Text>
         <TextInput
           style={styles.textInput}
@@ -74,14 +72,30 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
           value={emergencyName}
           onChangeText={(text) => setField('emergencyName', text)}
         />
-        <TextInput
-          style={styles.textInput}
-          placeholder="Add Number..."
-          placeholderTextColor="#666"
-          keyboardType="phone-pad"
-          value={emergencyNumber}
-          onChangeText={(text) => setField('emergencyNumber', text)}
-        />
+
+        <View style={styles.phoneRow}>
+          <View style={styles.prefixBox}>
+            <Text style={styles.prefixText}>+65</Text>
+          </View>
+
+          <TextInput
+            style={styles.phoneInput}
+            placeholder="Add Number..."
+            placeholderTextColor="#666"
+            keyboardType="phone-pad"
+            value={emergencyNumber}
+            onChangeText={(text) => {
+              const digitsOnly = text.replace(/\D/g, '');
+              if (digitsOnly.length === 8 && !/^[89]/.test(digitsOnly)) {
+                alert('Phone number must start with 8 or 9 and be 8 digits long.');
+                setField('emergencyNumber', '');
+              } else if (digitsOnly.length <= 8) {
+                setField('emergencyNumber', digitsOnly);
+              }
+            }}
+          />
+        </View>
+
         <TextInput
           style={styles.textInput}
           placeholder="Add Relationship..."
@@ -90,28 +104,7 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
           onChangeText={(text) => setField('emergencyRelationship', text)}
         />
 
-        {/* ─── “Share Location by Default” Toggle */}
-        <Text style={styles.sectionHeading}>Share Location in SOS</Text>
-        <Text style={styles.sectionText}>
-          Your device’s location is shared via a link. If location tracking is disabled, location will not be sent.
-        </Text>
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setField('shareLocationByDefault', !shareLocationByDefault)}
-          activeOpacity={0.7}
-        >
-          <View
-            style={[
-              styles.checkboxBase,
-              shareLocationByDefault && styles.checkboxBaseChecked,
-            ]}
-          >
-            {shareLocationByDefault && <Text style={styles.checkboxMark}>✓</Text>}
-          </View>
-          <Text style={styles.checkboxLabel}>Share my location by default</Text>
-        </TouchableOpacity>
-
-        {/* ─── Back & Save Buttons ───────────────────────── */}
+        {/* Back & Save Buttons (in flow, not floating) */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.button, styles.backButton]}
@@ -134,108 +127,119 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
   );
 }
 
-// ───────────────────────────────────────────────────────────────────
-// ─── THIS STYLESHEET IS EXACTLY AS YOU PREVIOUSLY HAD IT ───────────
-// ─── (No visual changes from your original “Configure SOS” styling) ───
-// ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: theme.background,
   },
   scrollContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 36,
   },
-
   heading: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 36,
+    fontFamily: 'Inter',
     fontWeight: '700',
-    marginBottom: 24,
+    marginBottom: 0,
+    textAlign: 'left',
   },
-
   sectionHeading: {
-    color: '#fff',
-    fontSize: 18,
+    color: theme.text,
+    fontSize: 24,
+    fontFamily: 'Inter',
     fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: 20,
+    marginTop: 24,
   },
   sectionText: {
-    color: '#ddd',
+    color: theme.muted,
     fontSize: 14,
+    fontFamily: 'Inter',
     marginBottom: 8,
+    lineHeight: 20,
   },
-
   textInputMulti: {
-    backgroundColor: '#1A1A1A',
-    color: '#fff',
+    backgroundColor: theme.card,
+    color: theme.text,
+    fontFamily: 'Inter',
+    fontSize: 16,
     borderRadius: 8,
     padding: 12,
-    height: 100,
+    height: 70,
     textAlignVertical: 'top',
-    marginBottom: 16,
+    marginBottom: 0,
+    borderColor: theme.input,
+    borderWidth: 1,
+    lineHeight: 20,
   },
   textInput: {
-    backgroundColor: '#1A1A1A',
-    color: '#fff',
+    backgroundColor: theme.card,
+    color: theme.text,
+    fontFamily: 'Inter',
+    fontSize: 16,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 12,
+    borderColor: theme.input,
+    borderWidth: 1,
   },
-
-  checkboxRow: {
+  phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 12,
+    marginBottom: 12,
   },
-  checkboxBase: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#888',
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+  prefixBox: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    backgroundColor: theme.card,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderRightWidth: 1,
+    borderColor: theme.border,
   },
-  checkboxBaseChecked: {
-    backgroundColor: '#4181D4',
-    borderColor: '#4181D4',
-  },
-  checkboxMark: {
-    color: '#fff',
+  prefixText: {
+    color: theme.text,
     fontSize: 16,
+    fontFamily: 'Inter',
   },
-  checkboxLabel: {
-    color: '#fff',
+  phoneInput: {
+    flex: 1,
+    backgroundColor: theme.card,
+    color: theme.text,
+    fontFamily: 'Inter',
     fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
-
   buttonRow: {
+    marginTop: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 32,
+    alignSelf: 'center',
+    width: 328,
   },
   button: {
     width: 150,
     height: 50,
-    borderRadius: 8,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backButton: {
-    backgroundColor: '#4a4a4a',
+    backgroundColor: theme.highlight,
   },
   saveButton: {
-    backgroundColor: '#4181D4',
+    backgroundColor: theme.accent,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: theme.text,
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'Inter',
   },
 });

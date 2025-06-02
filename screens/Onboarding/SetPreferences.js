@@ -13,10 +13,9 @@ import {
   ScrollView,
 } from 'react-native';
 
-// ← Import your OnboardingContext
 import { OnboardingContext } from '../../contexts/OnboardingContext';
+import { theme } from '../../constants/colors';
 
-// ─── “Radio” helper subcomponents (unchanged) ──────────────────────
 const RadioUnchecked = () => (
   <View style={styles.radioOuter}>
     <View style={styles.radioInnerUnselected} />
@@ -28,7 +27,6 @@ const RadioChecked = () => (
   </View>
 );
 
-// ─── “Checkbox” helper subcomponents (unchanged) ──────────────────
 const CheckboxUnchecked = () => <View style={styles.checkboxBase} />;
 const CheckboxChecked = () => (
   <View style={[styles.checkboxBase, styles.checkboxBaseChecked]}>
@@ -37,10 +35,8 @@ const CheckboxChecked = () => (
 );
 
 export default function SetPreferencesScreen({ navigation, onFinish }) {
-  // ─── Local state only for showing/hiding the Auto‐Wipe modal
   const [modalVisible, setModalVisible] = useState(false);
 
-  // ─── Pull everything from OnboardingContext (no local useState for these)
   const {
     autoWipeChoice,
     locationEnabled,
@@ -50,7 +46,6 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
     setField,
   } = useContext(OnboardingContext);
 
-  // ─── Called when “Save” is tapped
   const handleSaveAll = () => {
     console.log('Collected preferences data:', {
       autoWipeChoice,
@@ -59,7 +54,7 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
       micEnabled,
       galleryEnabled,
     });
-    navigation.replace('Tutorial');
+    navigation.navigate('Tutorial');
     onFinish && onFinish();
   };
 
@@ -72,13 +67,11 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ─── HEADING + SUBHEADING ───────────────────────────── */}
         <Text style={styles.heading}>Set Preferences</Text>
         <Text style={styles.subheading}>
           Customise optional features to match your safety needs. All can be changed later.
         </Text>
 
-        {/* ─── MANAGE AUTO‐WIPE ───────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Manage Auto-wipe</Text>
           <Text style={styles.sectionText}>
@@ -95,7 +88,6 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
           </TouchableOpacity>
         </View>
 
-        {/* ─── PRIVACY TOGGLES ───────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Privacy</Text>
 
@@ -126,7 +118,6 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
             <Text style={styles.checkboxLabel}>Enable microphone access</Text>
           </TouchableOpacity>
 
-          {/* ─── NEW: “Enable media gallery access” toggle ───────────────── */}
           <TouchableOpacity
             style={styles.checkboxRow}
             onPress={() => setField('galleryEnabled', !galleryEnabled)}
@@ -137,7 +128,6 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
           </TouchableOpacity>
         </View>
 
-        {/* ─── BACK & SAVE BUTTONS ─────────────────────────── */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.button, styles.backButton]}
@@ -156,7 +146,6 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
         </View>
       </ScrollView>
 
-      {/* ─── AUTO‐WIPE MODAL (unchanged styling) ───────────────────── */}
       <Modal
         visible={modalVisible}
         transparent
@@ -164,124 +153,109 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalHeading}>Auto-Wipe Settings</Text>
+              <Text style={styles.modalHelpText}>
+                Journal entries will automatically be deleted:
+              </Text>
 
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalHeading}>Auto-Wipe Settings</Text>
-          <Text style={styles.modalHelpText}>
-            Journal entries will automatically be deleted:
-          </Text>
+              {['24h', '48h', 'never'].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={styles.radioRow}
+                  onPress={() => setField('autoWipeChoice', option)}
+                  activeOpacity={0.7}
+                >
+                  {autoWipeChoice === option ? <RadioChecked /> : <RadioUnchecked />}
+                  <Text style={styles.radioLabel}>
+                    {option === 'never' ? 'Never' : `Every ${option}`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
 
-          <TouchableOpacity
-            style={styles.radioRow}
-            onPress={() => setField('autoWipeChoice', '24h')}
-            activeOpacity={0.7}
-          >
-            {autoWipeChoice === '24h' ? <RadioChecked /> : <RadioUnchecked />}
-            <Text style={styles.radioLabel}>Every 24h</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.radioRow}
-            onPress={() => setField('autoWipeChoice', '48h')}
-            activeOpacity={0.7}
-          >
-            {autoWipeChoice === '48h' ? <RadioChecked /> : <RadioUnchecked />}
-            <Text style={styles.radioLabel}>Every 48h</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.radioRow}
-            onPress={() => setField('autoWipeChoice', 'never')}
-            activeOpacity={0.7}
-          >
-            {autoWipeChoice === 'never' ? <RadioChecked /> : <RadioUnchecked />}
-            <Text style={styles.radioLabel}>Never</Text>
-          </TouchableOpacity>
-
-          <View style={styles.modalButtonRow}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.modalDiscard]}
-              onPress={() => setModalVisible(false)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.modalDiscardText}>Discard</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.modalSave]}
-              onPress={() => setModalVisible(false)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.modalSaveText}>Save</Text>
-            </TouchableOpacity>
+              <View style={styles.modalButtonRow}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalDiscard]}
+                  onPress={() => setModalVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalDiscardText}>Discard</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalSave]}
+                  onPress={() => setModalVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalSaveText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </KeyboardAvoidingView>
   );
 }
 
-// ───────────────────────────────────────────────────────────────────
-// ─── STYLESHEET IS EXACTLY AS YOU PROVIDED EARLIER ─────────────────
-// ─── (All style definitions unchanged, so the layout/colours match) ──
-// ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: theme.background,
   },
   scrollContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 36,
   },
-
   heading: {
-    color: '#fff',
-    fontSize: 36,
+    color: theme.text,
+    fontSize: 32,
+    fontFamily: 'Inter',
     fontWeight: '700',
     marginBottom: 8,
   },
   subheading: {
-    color: '#ddd',
+    color: theme.muted,
     fontSize: 16,
+    fontFamily: 'Inter',
     marginBottom: 24,
   },
-
   section: {
     marginBottom: 32,
   },
   sectionHeading: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 18,
+    fontFamily: 'Inter',
     fontWeight: '600',
-    marginBottom: 8,
-  },
-  sectionText: {
-    color: '#ddd',
-    fontSize: 14,
     marginBottom: 12,
   },
-
+  sectionText: {
+    color: theme.muted,
+    fontSize: 14,
+    fontFamily: 'Inter',
+    marginBottom: 12,
+  },
   dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: theme.card,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   dropdownText: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 16,
+    fontFamily: 'Inter',
   },
   dropdownValue: {
-    color: '#aaa',
+    color: theme.muted,
     fontSize: 16,
+    fontFamily: 'Inter',
   },
-
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -292,74 +266,75 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#888',
+    borderColor: theme.muted,
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxBaseChecked: {
-    backgroundColor: '#4181D4',
-    borderColor: '#4181D4',
+    backgroundColor: theme.accent,
+    borderColor: theme.accent,
   },
   checkboxMark: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 16,
+    fontWeight: '600',
   },
   checkboxLabel: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 16,
+    fontFamily: 'Inter',
   },
-
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 24,
+    alignSelf: 'center',
+    width: 328,
+    marginTop: 12,
   },
   button: {
     width: 150,
     height: 50,
-    backgroundColor: '#4181D4',
-    borderRadius: 8,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   backButton: {
-    backgroundColor: '#4a4a4a',
+    backgroundColor: theme.highlight,
   },
   saveButton: {
-    backgroundColor: '#4181D4',
+    backgroundColor: theme.accent,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: theme.text,
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'Inter',
   },
-
   modalOverlay: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContainer: {
-    position: 'absolute',
-    bottom: 80,
-    left: 20,
-    right: 20,
-    backgroundColor: '#1A1A1A',
+    width: '85%',
+    backgroundColor: theme.card,
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
   },
   modalHeading: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 8,
     textAlign: 'center',
+    marginBottom: 8,
   },
   modalHelpText: {
-    color: '#ddd',
+    color: theme.muted,
     fontSize: 14,
-    marginBottom: 12,
     textAlign: 'center',
+    marginBottom: 12,
   },
   radioRow: {
     flexDirection: 'row',
@@ -371,7 +346,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: '#888',
+    borderColor: theme.muted,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -386,17 +361,17 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#4181D4',
+    backgroundColor: theme.accent,
   },
   radioLabel: {
-    color: '#fff',
+    color: theme.text,
     fontSize: 16,
+    fontFamily: 'Inter',
   },
-
   modalButtonRow: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: theme.border,
     marginTop: 12,
   },
   modalButton: {
@@ -406,16 +381,16 @@ const styles = StyleSheet.create({
   },
   modalDiscard: {
     borderRightWidth: 1,
-    borderRightColor: '#333',
+    borderRightColor: theme.border,
   },
   modalDiscardText: {
-    color: '#E04C4C',
+    color: theme.danger,
     fontSize: 16,
     fontWeight: '600',
   },
   modalSave: {},
   modalSaveText: {
-    color: '#4181D4',
+    color: theme.accent,
     fontSize: 16,
     fontWeight: '600',
   },

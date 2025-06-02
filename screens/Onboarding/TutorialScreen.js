@@ -11,10 +11,13 @@ import {
   Platform,
 } from 'react-native';
 
+import { theme } from '../../constants/colors';
+import { FileHeart } from 'lucide-react-native';
+
 export default function TutorialScreen({ navigation, onFinish }) {
   const handleFinish = () => {
     // Simply go to SetupCompleteScreen
-    navigation.replace('SetupComplete');
+    navigation.navigate('SetupComplete');
     onFinish && onFinish();
   };
 
@@ -30,7 +33,10 @@ export default function TutorialScreen({ navigation, onFinish }) {
       >
         <Text style={styles.heading}>Using SafeNotes</Text>
 
-        <Text style={styles.quickGuideHeading}>SafeNotes Quick Guide</Text>
+        <View style={styles.headingRow}>
+          <FileHeart size={32} color={theme.accent} style={{ marginRight: 8 }} />
+          <Text style={styles.quickGuideHeading}>SafeNotes Quick Guide</Text>
+        </View>
         <Text style={styles.textBlock}>
           You can always find this tutorial under the Information tab as “SafeNotes Guide.”
         </Text>
@@ -61,9 +67,12 @@ export default function TutorialScreen({ navigation, onFinish }) {
           No login. No tracking. Your content stays on your device unless you choose to share it.
         </Text>
 
-        <View style={{ height: 24 }} />
+        <View style={{ height: 14 }} />
 
-        <Text style={styles.additionalTipsHeading}>Additional Tips</Text>
+        <View style={styles.headingRow}>
+          <FileHeart size={32} color={theme.accent} style={{ marginRight: 8 }} />
+          <Text style={styles.additionalTipsHeading}>Additional Tips</Text>
+        </View>
 
         <Text style={styles.sectionHeading}>Forgot Your PIN?</Text>
         <Text style={styles.textBlock}>
@@ -108,45 +117,106 @@ export default function TutorialScreen({ navigation, onFinish }) {
 }
 
 const styles = StyleSheet.create({
-  outerContainer: { flex: 1, backgroundColor: '#000' },
-  scrollView: { flex: 1 },
-  scrollContainer: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
-  heading: {
-    color: '#fff',
-    fontSize: 36,
-    fontWeight: '700',
-    marginBottom: 12,
+  outerContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
   },
-  quickGuideHeading: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '600',
+  scrollView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 48,
+  },
+  heading: {
+    color: theme.text,
+    fontSize: 32,
+    fontFamily: 'Inter',
+    fontWeight: '700',
+    marginBottom: 0,
+  },
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 28,
     marginBottom: 8,
   },
   sectionHeading: {
-    color: '#fff',
-    fontSize: 16,
+    color: theme.text,
+    fontSize: 20,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+  },
+  quickGuideHeading: {
+    color: theme.text,
+    fontSize: 28,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    marginBottom: 0,
+  },
+  sectionHeading: {
+    color: theme.text,
+    fontSize: 20,
+    fontFamily: 'Inter',
     fontWeight: '600',
     marginTop: 20,
     marginBottom: 6,
   },
   additionalTipsHeading: {
-    color: '#fff',
-    fontSize: 24,
+    color: theme.text,
+    fontSize: 28,
+    fontFamily: 'Inter',
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: 0,
   },
-  textBlock: { color: '#ddd', fontSize: 14, lineHeight: 22 },
-  bulletList: { marginLeft: 12, marginVertical: 8 },
-  bulletItem: { color: '#ddd', fontSize: 14, lineHeight: 22 },
-  bold: { fontWeight: '700', color: '#fff' },
+  textBlock: {
+    color: theme.text,
+    fontSize: 14,
+    fontFamily: 'Inter',
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  bulletList: {
+    marginLeft: 12,
+    marginVertical: 8,
+  },
+  bulletItem: {
+    color: theme.text,
+    fontSize: 14,
+    fontFamily: 'Inter',
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  bold: {
+    color: theme.text,
+    fontWeight: '700',
+    fontFamily: 'Inter',
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 32,
+    alignSelf: 'center',
+    width: 328,
+    marginTop: 24,
   },
-  button: { width: 150, height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
-  backButton: { backgroundColor: '#4a4a4a' },
-  finishButton: { backgroundColor: '#4181D4' },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  button: {
+    width: 150,
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButton: {
+    backgroundColor: theme.highlight,
+  },
+  finishButton: {
+    backgroundColor: theme.accent,
+  },
+  buttonText: {
+    color: theme.text,
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'Inter',
+  },
 });

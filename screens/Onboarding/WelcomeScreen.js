@@ -1,5 +1,3 @@
-// screens/Onboarding/WelcomeScreen.js
-
 import React from 'react';
 import {
   View,
@@ -7,67 +5,89 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Platform,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { theme } from '../../constants/colors';
 
-// Logo image
 const logo = require('../../assets/safenoteslogo.png');
 
 export default function WelcomeScreen() {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
-      <Image source={logo} style={styles.logo} resizeMode="contain" />
-      <Text style={styles.title}>Welcome to SafeNotes</Text>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 10 : 0 },
+      ]}
+    >
+      <View style={styles.container}>
+        <Image source={logo} style={styles.logo} resizeMode="contain" />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('PinSetup')}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.buttonText}>Begin Setup</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.title}>Welcome to SafeNotes</Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('PinSetup')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Begin Setup</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.background,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: theme.background,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   logo: {
-    width: 250,
-    height: 250,
-    marginBottom: 30,
+    width: 220,
+    height: 220,
+    marginBottom: 0,
   },
   title: {
-    color: '#fff',
-    fontSize: 45,
-    fontWeight: '600',
+    color: theme.text,
+    fontSize: 36,
+    fontFamily: 'Inter',
+    fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
   },
   button: {
-    backgroundColor: '#4181D4',
+    backgroundColor: theme.accent,
     paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    minWidth: 200,
+    paddingHorizontal: 36,
+    borderRadius: 12,
+    minWidth: 220,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 3,
+
+    // 3D effect
+    elevation: 6, // Android shadow
+    shadowColor: '#325480',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+
+    // Extra lift illusion
+    transform: [{ translateY: -2 }],
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: theme.text,
+    fontSize: 24,
+    fontFamily: 'Inter',
+    fontWeight: '700',
   },
 });
