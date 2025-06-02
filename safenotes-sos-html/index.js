@@ -18,22 +18,113 @@ export default {
             <meta charset="UTF-8">
             <title>SafeNotes SOS Media</title>
             <style>
-              body { background: #121212; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+              body {
+                background: #121212;
+                color: #fff;
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                padding-bottom: 60px; /* ← Prevents audio player from being clipped on iOS */
+                min-height: 100vh;     /* ← Ensures scrollable content height */
+              }
               h1 { color: #CA3535; }
               .media-item { margin-bottom: 20px; }
-              video, img { max-width: 100%; border: 1px solid #444; border-radius: 10px; }
+              video, img {
+                max-width: 100%;
+                max-height: 500px;
+                width: auto;
+                height: auto;
+                border: 1px solid #444;
+                border-radius: 10px;
+                display: block;
+                margin: 0 auto;
+              }
+              audio {
+                width: 100%;
+                max-width: 600px;
+                display: block;
+                margin-top: 8px;
+              }
             </style>
           </head>
           <body>
             <h1>SOS Media Archive</h1>
             <p>This page contains temporary emergency evidence. This page will expire in 24 hours.</p>
             ${media.map(url => {
-              if (url.endsWith('.mp4') || url.endsWith('.mov')) {
-                return `<div class="media-item"><video controls src="${url}"></video></div>`;
-              } else if (url.endsWith('.m4a')) {
-                return `<div class="media-item"><audio controls src="${url}"></audio></div>`;
-              } else {
-                return `<div class="media-item"><img src="${url}" alt="SOS media" /></div>`;
+              // 1) Video
+              if (url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm')) {
+                return `
+                  <div class="media-item">
+                    <video controls src="${url}"></video>
+                  </div>
+                `;
+              }
+
+              // 2) Audio (m4a, 3gp, mp3, wav, ogg, amr, opus)
+              else if (
+                url.endsWith('.m4a') ||
+                url.endsWith('.3gp') ||
+                url.endsWith('.mp3') ||
+                url.endsWith('.wav') ||
+                url.endsWith('.ogg') ||
+                url.endsWith('.amr') ||
+                url.endsWith('.opus')
+              ) {
+                // Pick the correct type string for each
+                let sourceTag;
+                if (url.endsWith('.3gp')) {
+                  sourceTag = `<source src="${url}" type="audio/3gpp">`;
+                } else if (url.endsWith('.m4a')) {
+                  sourceTag = `
+                    <source src="${url}" type="audio/mp4">
+                    <source src="${url}" type="audio/m4a">
+                  `;
+                } else if (url.endsWith('.mp3')) {
+                  sourceTag = `<source src="${url}" type="audio/mpeg">`;
+                } else if (url.endsWith('.wav')) {
+                  sourceTag = `<source src="${url}" type="audio/wav">`;
+                } else if (url.endsWith('.ogg')) {
+                  sourceTag = `<source src="${url}" type="audio/ogg">`;
+                } else if (url.endsWith('.amr')) {
+                  sourceTag = `<source src="${url}" type="audio/amr">`;
+                } else if (url.endsWith('.opus')) {
+                  sourceTag = `<source src="${url}" type="audio/opus">`;
+                }
+
+                return `
+                  <div class="media-item">
+                    <audio controls>
+                      ${sourceTag}
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                `;
+              }
+
+              // 3) Images (jpg, jpeg, png, gif, bmp, webp)
+              else if (
+                url.endsWith('.jpg') ||
+                url.endsWith('.jpeg') ||
+                url.endsWith('.png') ||
+                url.endsWith('.gif') ||
+                url.endsWith('.bmp') ||
+                url.endsWith('.webp')
+              ) {
+                return `
+                  <div class="media-item">
+                    <img src="${url}" alt="SOS media" />
+                  </div>
+                `;
+              }
+
+              // 4) PDF or other non–media files (render as download link or icon)
+              else {
+                return `
+                  <div class="media-item">
+                    <a href="${url}" target="_blank" rel="noopener noreferrer">
+                      Download file
+                    </a>
+                  </div>
+                `;
               }
             }).join('')}
             <p style="color:#888; font-size: 0.9em;">Page generated by SafeNotes. If you see a 404 for media, it has expired for safety reasons.</p>

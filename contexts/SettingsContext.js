@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import debounce from 'lodash.debounce';
 
 export const SettingsContext = createContext();
 
@@ -21,8 +22,8 @@ export const SettingsProvider = ({ children }) => {
   });
 
   // App config
-  const [autoWipeTTL, setAutoWipeTTL] = useState('24h'); // '24h', '48h', 'never'
-  const [accessPin, setAccessPin] = useState('1234'); // default pin
+  const [autoWipeTTL, setAutoWipeTTL] = useState('24h');
+  const [accessPin, setAccessPin] = useState('1234');
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -39,7 +40,6 @@ export const SettingsProvider = ({ children }) => {
         const storedPin = await SecureStore.getItemAsync('accessPin');
         if (storedPin) setAccessPin(storedPin);
 
-        // ✅ NEW: Load privacy toggles
         const loc = await SecureStore.getItemAsync('locationEnabled');
         if (loc !== null) setLocationEnabled(loc === 'true');
 
@@ -59,33 +59,71 @@ export const SettingsProvider = ({ children }) => {
     loadSettings();
   }, []);
 
+  const debouncedSaveMessage = debounce(async (val) => {
+    await SecureStore.setItemAsync('emergencyMessage', val);
+  }, 500);
+
+  const debouncedSaveAccessPin = debounce(async (val) => {
+    await SecureStore.setItemAsync('accessPin', val);
+  }, 500);
+
+  const debouncedSaveAutoWipeTTL = debounce(async (val) => {
+    await SecureStore.setItemAsync('autoWipeTTL', val);
+  }, 500);
+
   return (
     <SettingsContext.Provider
       value={{
         isUnlocked,
         setIsUnlocked,
 
-        // Toggles
         locationEnabled,
-        setLocationEnabled,
+        setLocationEnabled: async (val) => {
+          setLocationEnabled(val);
+          await SecureStore.setItemAsync('locationEnabled', JSON.stringify(val));
+        },
+
         cameraEnabled,
-        setCameraEnabled,
+        setCameraEnabled: async (val) => {
+          setCameraEnabled(val);
+          await SecureStore.setItemAsync('cameraEnabled', JSON.stringify(val));
+        },
+
         micEnabled,
-        setMicEnabled,
+        setMicEnabled: async (val) => {
+          setMicEnabled(val);
+          await SecureStore.setItemAsync('micEnabled', JSON.stringify(val));
+        },
+
         galleryEnabled,
-        setGalleryEnabled,
+        setGalleryEnabled: async (val) => {
+          setGalleryEnabled(val);
+          await SecureStore.setItemAsync('galleryEnabled', JSON.stringify(val));
+        },
 
-        // Config
         autoWipeTTL,
-        setAutoWipeTTL,
-        accessPin,
-        setAccessPin,
+        setAutoWipeTTL: (val) => {
+          setAutoWipeTTL(val);
+          debouncedSaveAutoWipeTTL(val);
+        },
 
-        // Emergency
+        accessPin,
+        setAccessPin: (val) => {
+          setAccessPin(val);
+          debouncedSaveAccessPin(val);
+        },
+
         emergencyMessage,
-        setEmergencyMessage,
+        setEmergencyMessage: (val) => {
+          setEmergencyMessage(val);
+          debouncedSaveMessage(val);
+        },
+
         emergencyContact,
-        setEmergencyContact,
+        setEmergencyContact: async (val) => {
+          setEmergencyContact(val);
+          await SecureStore.setItemAsync('emergencyContact', JSON.stringify(val));
+        },
       }}
     >
       {children}

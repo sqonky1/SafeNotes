@@ -6,11 +6,12 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../../constants/colors';
 import { TabHistoryContext } from '../../contexts/TabHistoryContext';
-
+import Constants from 'expo-constants';
 import {
   BookOpenText,
   MessageSquareText,
@@ -39,7 +40,16 @@ export default function HomeScreen() {
       {/* Floating SOS Button */}
       <TouchableOpacity
         style={styles.sosButton}
-        onPress={() => navigation.navigate('SOS')}
+        onPress={() => {
+          Alert.alert(
+            "Emergency SOS",
+            "Only use this function in life-threatening emergencies.\n\nAre you sure you want to proceed?",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "I Understand", onPress: () => navigation.navigate("SOS") }
+            ]
+          );
+        }}
       >
         <Text style={styles.sosText}>SOS</Text>
       </TouchableOpacity>
