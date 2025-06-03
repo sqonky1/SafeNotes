@@ -9,7 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-community/hooks": "^100.1.0",
     "@react-navigation/bottom-tabs": "^7.3.13",
     "@react-navigation/native": "^7.1.9",
     "@react-navigation/native-stack": "^7.3.13",
@@ -36,6 +38,7 @@
     "htmlparser2": "^10.0.0",
     "lucide-react-native": "^0.511.0",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-markdown-renderer": "^3.2.8",
@@ -51,16 +54,14 @@
     "react-native-webview": "^13.13.5",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
-    "uuid": "^11.1.0",
-    "react-dom": "19.0.0",
-    "@expo/metro-runtime": "~5.0.4"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "latest",
     "eslint": "^9.27.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-native": "^5.0.0",
-    "@react-native-community/cli": "latest",
     "prettier": "^3.5.3"
   },
   "private": true,

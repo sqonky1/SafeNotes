@@ -12,7 +12,9 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  SafeAreaView,
 } from 'react-native';
+import { theme } from '../../constants/colors';
 
 /**
  * ── Gemini Flash API Configuration ──────────────────────────────────────────
@@ -291,68 +293,74 @@ Assistant:
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
-      keyboardVerticalOffset={Platform.select({ ios: 90, android: 0 })}
-    >
-      {/* ─── Clear Chat + Remaining Indicator ──────────────────────────── */}
-      <View style={styles.clearContainer}>
-        <Text style={styles.limitText}>
-          {remaining > 0
-            ? `Messages left: ${remaining}`
-            : 'Limit reached'}
-        </Text>
-        <TouchableOpacity onPress={clearChat} style={styles.clearButton}>
-          <Text style={styles.clearButtonText}>Clear Chat</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Chat history (inverted so newest messages appear at the bottom) */}
-      <FlatList
-        data={messages}
-        renderItem={renderMessageItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.chatContentContainer}
-        inverted
-      />
-
-      {/* Loading spinner & text overlay when waiting for Gemini */}
-      {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}> Listening...</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.select({ ios: 'padding', android: undefined })}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Chatbot</Text>
         </View>
-      )}
+        {/* ─── Clear Chat + Remaining Indicator ──────────────────────────── */}
+        <View style={styles.clearContainer}>
+          <Text style={styles.limitText}>
+            {remaining > 0
+              ? `Messages left: ${remaining}`
+              : 'Limit reached'}
+          </Text>
+          <TouchableOpacity onPress={clearChat} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>Clear Chat</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Input area */}
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={[styles.inputField, { color: '#FFF' }]}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Type your message..."
-          placeholderTextColor="#AAA"
-          editable={!isLoading && effectiveCount < MESSAGE_LIMIT}
-          multiline
+        {/* Chat history (inverted so newest messages appear at the bottom) */}
+        <FlatList
+          data={messages}
+          renderItem={renderMessageItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.chatContentContainer}
+          inverted
+          keyboardShouldPersistTaps="handled"
         />
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            (isLoading || !inputText.trim() || effectiveCount >= MESSAGE_LIMIT) &&
-              styles.sendButtonDisabled,
-          ]}
-          onPress={handleSendPress}
-          disabled={
-            isLoading ||
-            !inputText.trim() ||
-            effectiveCount >= MESSAGE_LIMIT
-          }
-        >
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        {/* Loading spinner & text overlay when waiting for Gemini */}
+        {isLoading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={styles.loadingText}> Listening...</Text>
+          </View>
+        )}
+
+        {/* Input area */}
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[styles.inputField, { color: '#FFF' }]}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Type your message..."
+            placeholderTextColor="#AAA"
+            editable={!isLoading && effectiveCount < MESSAGE_LIMIT}
+            multiline
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton,
+              (isLoading || !inputText.trim() || effectiveCount >= MESSAGE_LIMIT) &&
+                styles.sendButtonDisabled,
+            ]}
+            onPress={handleSendPress}
+            disabled={
+              isLoading ||
+              !inputText.trim() ||
+              effectiveCount >= MESSAGE_LIMIT
+            }
+          >
+            <Text style={styles.sendButtonText}>Send</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -361,7 +369,27 @@ Assistant:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Dark background
+    backgroundColor: theme.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 20,
+    position: 'relative',
+    paddingHorizontal: 24,
+  },
+  title: {
+    fontSize: 45,
+    fontWeight: 'bold',
+    fontFamily: 'Inter',
+    color: theme.text,
+    marginLeft: 0,
+  },
+  backButton: {
+    position: 'absolute',
+    left: -25,
+    top: -40,
   },
   clearContainer: {
     flexDirection: 'row',
@@ -369,11 +397,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderColor: '#444',
-    backgroundColor: '#1E1E1E',
+    borderColor: theme.border,
+    backgroundColor: theme.card,
   },
   limitText: {
-    color: '#DDD',
+    color: theme.muted,
     fontSize: 14,
     alignSelf: 'center',
   },
@@ -381,10 +409,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#555',
+    backgroundColor: theme.highlight,
   },
   clearButtonText: {
-    color: '#FFF',
+    color: theme.text,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -405,22 +433,22 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#007AFF', // Blue bubble for the user
+    backgroundColor: theme.accent,
     alignSelf: 'flex-end',
     borderBottomRightRadius: 5,
   },
   botBubble: {
-    backgroundColor: '#E5E5EA', // Light gray bubble for the bot
+    backgroundColor: '#E5E5EA', // Optional: make this theme.card if you want dark bubbles too
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 5,
   },
   userText: {
-    color: '#FFF',
+    color: theme.text,
     fontSize: 16,
     lineHeight: 22,
   },
   botText: {
-    color: '#000',
+    color: '#000', // Keep black for contrast, or replace with theme.text if you theme dark bubbles too
     fontSize: 16,
     lineHeight: 22,
   },
@@ -430,22 +458,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderColor: '#444',
-    backgroundColor: '#1E1E1E',
+    borderColor: theme.border,
+    backgroundColor: theme.card,
   },
   inputField: {
     flex: 1,
     minHeight: 40,
     maxHeight: 120,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: theme.input,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 16,
     marginRight: 8,
+    color: theme.text,
   },
   sendButton: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: theme.accent,
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -453,16 +482,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sendButtonDisabled: {
-    backgroundColor: '#555', // Gray when disabled
+    backgroundColor: theme.highlight,
   },
   sendButtonText: {
-    color: '#FFF',
+    color: theme.text,
     fontSize: 16,
     fontWeight: '600',
   },
   loadingOverlay: {
     position: 'absolute',
-    bottom: 80, // Slightly above the input
+    bottom: 80,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -472,7 +501,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginLeft: 10,
-    color: '#FFF',
+    color: theme.text,
     fontSize: 14,
   },
 });
+
