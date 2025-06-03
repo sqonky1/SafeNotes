@@ -11,7 +11,7 @@ const {
  * Uploads media from local SafeNotes storage to Supabase,
  * stores public metadata, and returns public URL.
  */
-export async function uploadMediaFromLocalAndGetPublicUrl(uri, mimeType = 'application/octet-stream') {
+export async function uploadMediaFromLocal(uri, mimeType = 'application/octet-stream') {
   const ext = uri.split('.').pop();
   const uuid = await generateUUID();
   const fileName = `${uuid}.${ext}`;
