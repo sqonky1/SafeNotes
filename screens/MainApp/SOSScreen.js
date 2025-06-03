@@ -117,16 +117,20 @@ export default function SOSScreen() {
     let msg = message;
 
     if (includeLocation) {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
+      try {
         const loc = await Location.getCurrentPositionAsync({});
         const mapsLink = `https://maps.google.com/?q=${loc.coords.latitude},${loc.coords.longitude}`;
         msg += `\n\nMy location: ${mapsLink}`;
+      } catch (err) {
+        console.warn('[SOS] Location error:', err);
+        msg += `\n\n[Location could not be retrieved]`;
       }
     }
 
     if (mediaSelected.length > 0) {
       const publicUrls = [];
+      let mediaUploadFailed = false;
+      
       for (const uri of mediaSelected) {
         const ext = uri.split('.').pop().toLowerCase();
         console.log('[SOS] uploadMediaFromLocal got URI:', uri);
@@ -143,16 +147,38 @@ export default function SOSScreen() {
           ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
           ext === 'png' ? 'image/png' :
           'application/octet-stream';
-        const url = await uploadMediaFromLocal(uri, mime);
-        publicUrls.push(url);
+          
+          try {
+            const url = await uploadMediaFromLocal(uri, mime);
+            publicUrls.push(url);
+          } catch (err) {
+            console.warn('[SOS] Media upload failed:', err);
+            mediaUploadFailed = true;
+          }
       }
-      const response = await fetch('https://safenotes-sos-html.safenotes-sos.workers.dev/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ media: publicUrls }),
-      });
-      const data = await response.json();
-      if (data.html_url) msg += `\n\nMedia evidence: ${data.html_url}`;
+
+      if (mediaUploadFailed) {
+        msg += `\n\n[One or more media files failed to upload]`;
+      }
+
+      if (publicUrls.length > 0) {
+        try {
+          const response = await fetch('https://safenotes-sos-html.safenotes-sos.workers.dev/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ media: publicUrls }),
+          });
+          const data = await response.json();
+          if (data.html_url) {
+            msg += `\n\nMedia evidence: ${data.html_url}`;
+          } else {
+            msg += `\n\n[Media link could not be generated]`;
+          }
+        } catch (err) {
+          console.warn('[SOS] HTML link generation failed:', err);
+          msg += `\n\n[Media link could not be generated]`;
+        }
+      }
     }
 
     if (emergencyContact?.number) {
@@ -409,13 +435,33 @@ export default function SOSScreen() {
             <View style={styles.modalOverlay}>
               <View style={styles.modalBox}>
                 <ScrollView style={{ maxHeight: 300 }}>
-                  <Text style={styles.modalText}>
-                    This is a placeholder tutorial on how to delete an SMS:
-                    {'\n\n'}1. Open your Messages app.
-                    {'\n'}2. Long press on the SOS message you just sent.
-                    {'\n'}3. Tap “Delete” or the trash bin icon.
-                    {'\n\n'}This helps protect your privacy if you are using a shared or monitored device.
-                  </Text>
+                  <View>
+                    <Text style={styles.modalText}>
+                      To delete the SOS SMS (text message) from your phone to evade detection, follow these steps. This only removes the message from <Text style={[styles.modalText, { fontWeight: 'bold' }]}>your device</Text>.
+                    </Text>
+
+                    {Platform.OS === 'android' ? (
+                      <>
+                        <Text style={styles.modalText}>{'\n'}1. Open the Messages app.</Text>
+                        <Text style={styles.modalText}>2. Find and open the conversation.</Text>
+                        <Text style={styles.modalText}>3. Press and hold the message you want to delete.</Text>
+                        <Text style={styles.modalText}>4. Tap the trash can icon or "Delete" option.</Text>
+                        <Text style={styles.modalText}>5. Confirm deletion if prompted.</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text style={styles.modalText}>{'\n'}1. Open the Messages app.</Text>
+                        <Text style={styles.modalText}>2. Open the conversation.</Text>
+                        <Text style={styles.modalText}>3. Press and hold the message bubble.</Text>
+                        <Text style={styles.modalText}>4. Tap "More…".</Text>
+                        <Text style={styles.modalText}>5. Select the message(s) you want to delete.</Text>
+                        <Text style={styles.modalText}>6. Tap the trash can icon and confirm.</Text>
+                      </>
+                    )}
+
+                    <Text style={styles.modalText}>{'\n\n'}SMS does <Text style={[styles.modalText, { fontWeight: 'bold' }]}>not</Text> support “unsend” or delete-for-everyone.</Text>
+                    <Text style={styles.modalText}>This only hides it from your phone. The other person will still see it unless they delete it too.</Text>
+                  </View>
                 </ScrollView>
                 <TouchableOpacity onPress={() => setShowDeleteHelpModal(false)}>
                   <Text style={styles.buttonText}>Close</Text>
