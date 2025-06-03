@@ -1,6 +1,6 @@
 // ─── SafeNotes/screens/MainApp/ChatbotScreen.js ─────────────────────
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -14,6 +14,8 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  Keyboard,
+  Animated,
 } from 'react-native';
 import { theme } from '../../constants/colors';
 import BackButton from '../../components/UI/BackButton';
@@ -125,6 +127,9 @@ export default function ChatbotScreen() {
   const [messages, setMessages] = useState(initialMessages);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Keyboard height
+  const [keyboardHeight] = useState(new Animated.Value(0));
 
   // Calculate how many messages count toward the limit (exclude the initial-bot)
   const effectiveCount = messages.length - 1;
@@ -294,6 +299,29 @@ Assistant:
     );
   };
 
+  // Keyboard listeners
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardWillShow', (e) => {
+      Animated.timing(keyboardHeight, {
+        toValue: e.endCoordinates.height,
+        duration: e.duration || 250,
+        useNativeDriver: false,
+      }).start();
+    });
+    const hideSub = Keyboard.addListener('keyboardWillHide', (e) => {
+      Animated.timing(keyboardHeight, {
+        toValue: 0,
+        duration: e.duration || 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView
       style={{
@@ -302,11 +330,7 @@ Assistant:
         backgroundColor: theme.background,
       }}
     >
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.select({ ios: 'padding', android: undefined })}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
-      >
+     <View style={styles.container}>
         <View style={styles.header}>
           <BackButton style={styles.backButton} />
           <Text style={styles.title}>Chatbot</Text>
@@ -342,7 +366,13 @@ Assistant:
         )}
 
         {/* Input area */}
-        <View style={styles.inputWrapper}>
+        <Animated.View 
+          style={[
+            styles.inputWrapper, { 
+              marginBottom: Platform.OS === 'ios'
+                ? Animated.diffClamp(keyboardHeight, 0, 200)
+                : 0
+            }]}>
           <TextInput
             style={[styles.inputField, { color: '#FFF' }]}
             value={inputText}
@@ -367,8 +397,8 @@ Assistant:
           >
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </SafeAreaView>
   );
 }
