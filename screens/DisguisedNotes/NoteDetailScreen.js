@@ -89,7 +89,6 @@ export default function NoteDetailScreen() {
     const loadNote = async () => {
       if (noteId) {
         const note = await getNoteByIdAsync(noteId);
-        console.log("📄 Loaded existing note:", note); // 👈 ADD THIS
         if (note) {
           setTitle(note.title || '');
           setHtmlContent(note.content || '');
@@ -101,8 +100,6 @@ export default function NoteDetailScreen() {
             }
           }, 0);
         }
-      } else {
-        console.log("📄 Creating new note"); 
       }
     };
     loadNote();

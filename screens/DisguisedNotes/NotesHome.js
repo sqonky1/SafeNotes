@@ -103,6 +103,7 @@ export default function NotesHome() {
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
+        overScrollMode="never"
       />
 
       {/* Calculator FAB */}
