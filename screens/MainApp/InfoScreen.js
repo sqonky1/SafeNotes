@@ -1,79 +1,92 @@
-import { Heart, Info, ChevronLeft } from 'lucide-react-native'
-import { useNavigation } from '@react-navigation/native'
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native'
-import { theme } from '../../constants/colors' // adjust path if needed
-
-const HeartIcon = <Heart color="red" size={20} />
-const InfoIcon = <Info color="#4181D4" size={20} />
-
-const items = [
-  { icon: HeartIcon, label: 'Signs of domestic violence' },
-  { icon: HeartIcon, label: 'What to do if you are in danger' },
-  { icon: HeartIcon, label: 'Legal and shelter support' },
-  { icon: HeartIcon, label: 'Emergency hotlines & helplines' },
-  { icon: InfoIcon, label: 'How to keep SafeNotes hidden' },
-  { icon: InfoIcon, label: 'SafeNotes Guide' },
-  { icon: InfoIcon, label: 'How do I delete an SMS for myself?' },
-]
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { theme } from '../../constants/colors';
+import BackButton from '../../components/UI/BackButton';
+import { infoData } from '../../data/infoData';
+import InfoCard from '../../components/UI/InfoCard';
+import infoIconMap from '../../components/UI/InfoIconMap';
 
 export default function InfoScreen() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-        <ChevronLeft color="white" size={28} />
-      </Pressable>
-
-      {/* H1 Heading */}
-      <Text style={styles.h1}>Information</Text>
-
-      {/* List of items */}
-      <ScrollView>
-        {items.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <View>{item.icon}</View>
-            <Text style={styles.cardText}>{item.label}</Text>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <ScrollView style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <BackButton style={styles.backButton} />
+            <Text style={styles.title}>Information</Text>
           </View>
-        ))}
-      </ScrollView>
-    </View>
-  )
+
+          {/* Info List */}
+          <View style={styles.group}>
+            {infoData.map((item, index) => (
+              <Pressable
+                key={index}
+                onPress={() =>
+                  navigation.push('InfoDetail', {
+                    icon: item.icon,
+                    title: item.label,
+                    content: item.fullText,
+                  })
+                }
+              >
+                <InfoCard iconComponent={infoIconMap[item.icon]} title={item.label} />
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    paddingTop: 60,
-    paddingLeft: 20,
+    paddingHorizontal: 24,
+    paddingTop: 40,
   },
-  text: {
-    color: theme.text,
-    fontFamily: 'Inter',
-    fontSize: 18,
-  },
-  h1: {
-    color: theme.text,
-    fontSize: 36,
-    fontWeight: 'bold',
-  },
-  card: {
-    backgroundColor: '#1e1e1e',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 0,
+    position: 'relative',
   },
-  cardText: {
+  title: {
+    fontSize: 45,
     fontWeight: 'bold',
-    color: 'white',
-    fontSize: 16,
-    marginLeft: 10,
+    fontFamily: 'Inter',
+    color: theme.text,
+    marginLeft: 0,
   },
-  backButton: {},
-})
+  group: {
+    marginTop: 10,
+    paddingVertical: 5,
+    marginBottom: 24,
+  },
+  backButton: {
+    position: 'absolute',
+    left: -25,
+    top: -40,
+  },
+});
