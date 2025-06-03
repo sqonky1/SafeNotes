@@ -13,8 +13,10 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { theme } from '../../constants/colors';
+import BackButton from '../../components/UI/BackButton';
 
 /**
  * ── Gemini Flash API Configuration ──────────────────────────────────────────
@@ -293,13 +295,20 @@ Assistant:
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.select({ ios: 'padding', android: undefined })}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <View style={styles.header}>
+          <BackButton style={styles.backButton} />
           <Text style={styles.title}>Chatbot</Text>
         </View>
         {/* ─── Clear Chat + Remaining Indicator ──────────────────────────── */}
@@ -370,14 +379,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
+    paddingTop: 30,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 0,
+    paddingBottom: 15,
     position: 'relative',
-    paddingHorizontal: 24,
+    paddingHorizontal: 48,
   },
   title: {
     fontSize: 45,
@@ -388,8 +398,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    left: -25,
-    top: -40,
+    left: -10,
+    top: -8,
   },
   clearContainer: {
     flexDirection: 'row',
@@ -438,7 +448,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 5,
   },
   botBubble: {
-    backgroundColor: '#E5E5EA', // Optional: make this theme.card if you want dark bubbles too
+    backgroundColor: theme.input, // Original: #E5E5EA
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 5,
   },
@@ -448,7 +458,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   botText: {
-    color: '#000', // Keep black for contrast, or replace with theme.text if you theme dark bubbles too
+    color: theme.text, // Original: #000
     fontSize: 16,
     lineHeight: 22,
   },
