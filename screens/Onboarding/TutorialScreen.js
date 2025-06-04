@@ -38,27 +38,33 @@ export default function TutorialScreen({ navigation, onFinish }) {
           <Text style={styles.quickGuideHeading}>SafeNotes Quick Guide</Text>
         </View>
         <Text style={styles.textBlock}>
-          You can always find this tutorial under the Information tab as “SafeNotes Guide.”
+          Welcome to SafeNotes, a disguised notes app that helps you stay safe, collect evidence, and send SOS alerts without drawing attention.
+          {'\n\n'}You can always find this tutorial under the Information tab as “SafeNotes Guide.”
         </Text>
+
+        <View style={styles.headingRow}>
+          <FileHeart size={32} color={theme.accent} style={{ marginRight: 8 }} />
+          <Text style={styles.quickGuideHeading}>Essentials</Text>
+        </View>
 
         <Text style={styles.sectionHeading}>Disguised Entry</Text>
         <Text style={styles.textBlock}>
-          To open SafeNotes, tap the calculator icon inside the Notes screen and enter your PIN.
+          To open SafeNotes, tap the calculator icon inside the Notes homepage or any note screen. Enter your PIN and press '=' to unlock.
         </Text>
 
         <Text style={styles.sectionHeading}>Exit Safely</Text>
         <Text style={styles.textBlock}>
-          Triple-tap anywhere to return instantly to the disguised Notes screen.
+          Triple-tap quickly anywhere to return instantly to the disguised Notes homepage.
         </Text>
 
         <Text style={styles.sectionHeading}>Tools Inside</Text>
         <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• Send SOS messages with your location</Text>
+          <Text style={styles.bulletItem}>• Send SOS messages with your location and selected media</Text>
           <Text style={styles.bulletItem}>• Access helpful Information pages</Text>
           <Text style={styles.bulletItem}>• Talk to our AI Chatbot for emotional support</Text>
           <Text style={styles.bulletItem}>• Record private media logs (audio, photo, video)</Text>
           <Text style={styles.bulletItem}>
-            • Control safety features and auto-deletion in Settings
+            • Control privacy and safety features in Settings
           </Text>
         </View>
 
@@ -76,7 +82,10 @@ export default function TutorialScreen({ navigation, onFinish }) {
 
         <Text style={styles.sectionHeading}>Forgot Your PIN?</Text>
         <Text style={styles.textBlock}>
-          Long-press anywhere on the real UI for 3 seconds to unlock with biometric authentication.
+          Long-press '=' in the calculator for 3 seconds to unlock with biometric authentication if enabled.
+          For your safety, if biometric is disabled, you have no way to recover your PIN. 
+          To continue using SafeNotes, you have to reinstall the app, and all data will be erased.
+          Please remember it carefully. You can enable biometrics under Settings → Privacy.
         </Text>
 
         <Text style={styles.sectionHeading}>Hiding the App on Your Device</Text>
@@ -88,10 +97,12 @@ export default function TutorialScreen({ navigation, onFinish }) {
           Use your device’s Secure Folder (e.g. Samsung Secure Folder) to rename or hide SafeNotes.
         </Text>
 
-        <Text style={styles.sectionHeading}>Auto-Wipe Option</Text>
+        <Text style={styles.sectionHeading}>Media Journal</Text>
         <Text style={styles.textBlock}>
-          SafeNotes can automatically delete your logs and media after a set time. Configure
-          this under Settings → Auto-Wipe.
+          SafeNotes can automatically delete your media after a set time. Configure
+          this under Settings → Privacy → Auto-Wipe. 
+          To record photos, videos or audio, make sure camera and microphone access are enabled under Settings.
+          To upload media from your phone gallery, enable gallery access under Settings.
         </Text>
 
         <View style={styles.buttonRow}>

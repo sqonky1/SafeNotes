@@ -69,13 +69,13 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
       >
         <Text style={styles.heading}>Set Preferences</Text>
         <Text style={styles.subheading}>
-          Customise optional features to match your safety needs. All can be changed later.
+          Set permissions to control what SafeNotes can access on your device. All can be changed later under Settings.
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionHeading}>Manage Auto-wipe</Text>
+          <Text style={styles.sectionHeading}>Auto-wipe</Text>
           <Text style={styles.sectionText}>
-            Automatically deletes media journal logs after a time you choose.
+            Auto-deletes media logs older than a set limit.
           </Text>
 
           <TouchableOpacity
@@ -89,7 +89,10 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionHeading}>Privacy</Text>
+          <Text style={styles.sectionHeading}>Location</Text>
+          <Text style={styles.sectionText}>
+            Location is shared in your SOS as a link if enabled.
+          </Text>
 
           <TouchableOpacity
             style={styles.checkboxRow}
@@ -99,6 +102,13 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
             {locationEnabled ? <CheckboxChecked /> : <CheckboxUnchecked />}
             <Text style={styles.checkboxLabel}>Enable location tracking</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeading}>Media</Text>
+          <Text style={styles.sectionText}>
+            These control how you can upload media into your SafeNotes Journal.
+          </Text>
 
           <TouchableOpacity
             style={styles.checkboxRow}
@@ -226,14 +236,14 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     color: theme.text,
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Inter',
     fontWeight: '600',
     marginBottom: 12,
   },
   sectionText: {
     color: theme.muted,
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Inter',
     marginBottom: 12,
   },

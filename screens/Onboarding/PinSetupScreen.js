@@ -65,7 +65,7 @@ export default function PinSetupScreen({ navigation, onFinish }) {
     onFinish && onFinish();
   };
 
-  const KEY_WIDTH = 104;
+  const KEY_WIDTH = 118;
   const KEY_HEIGHT = 85;
   const H_GAP = 8;
 
@@ -79,12 +79,12 @@ export default function PinSetupScreen({ navigation, onFinish }) {
         Unlock PIN
       </Text>
 
-      <Text style={styles.subtitle}>
-        This PIN will be entered into the calculator to unlock SafeNotes.
+      <Text style={styles.sectionText}>
+        This PIN will be entered in the calculator to unlock the real SafeNotes interface.
       </Text>
 
-      <Text style={styles.helperText}>
-        Make sure it’s easy for you to remember, but hard for others to guess.
+      <Text style={styles.sectionText}>
+        Choose something you can remember, but others won’t guess.
       </Text>
 
       <View style={styles.fieldsContainer}>
@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: 'Inter',
     fontWeight: '700',
-    textAlign: 'center',
     marginBottom: 8,
   },
 
@@ -250,15 +249,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Inter',
     fontWeight: '400',
-    textAlign: 'center',
     marginBottom: 6,
   },
-
+  sectionText: {
+    color: theme.muted,
+    fontSize: 16,
+    fontFamily: 'Inter',
+    marginBottom: 12,
+  },
   helperText: {
     color: theme.muted,
     fontSize: 14,
     fontFamily: 'Inter',
-    textAlign: 'center',
     marginBottom: 14,
   },
 
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
   keypadWrapper: {
     width: 328,
     height: 358,
-    alignSelf: 'center',
+    align: 'center',
     marginBottom: 24,
     justifyContent: 'center',
   },

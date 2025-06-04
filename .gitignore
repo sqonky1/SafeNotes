@@ -47,9 +47,7 @@ supabase/functions/delete-expired-media/.env
 app.config.js
 
 # Native build files and configs
-android/.gradle/
-android/.cxx/
-android/build/
-android/app/build/
-android/local.properties
+android/
 ios/
+
+allfiles.txt

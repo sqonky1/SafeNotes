@@ -54,6 +54,11 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
       >
         <Text style={styles.heading}>Configure SOS</Text>
 
+        <Text style={styles.sectionText}>
+          Your SOS message will be sent via SMS with your location and selected media, if enabled.{'\n\n'}
+          It can be sent to your chosen emergency contact or to the police. Use only in real emergencies.
+        </Text>
+
         <Text style={styles.sectionHeading}>Message</Text>
         <TextInput
           style={styles.textInputMulti}
@@ -64,7 +69,8 @@ export default function ConfigureSOSScreen({ navigation, onFinish }) {
           placeholderTextColor="#666"
         />
 
-        <Text style={styles.sectionHeading}>Emergency Contact (Optional)</Text>
+        <Text style={styles.sectionHeading}>Emergency Contact</Text>
+        <Text style={styles.sectionText}>(Optional but recommended)</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Add Name..."
@@ -142,7 +148,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: 'Inter',
     fontWeight: '700',
-    marginBottom: 0,
+    marginBottom: 15,
     textAlign: 'left',
   },
   sectionHeading: {
@@ -150,14 +156,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Inter',
     fontWeight: '600',
-    marginBottom: 20,
-    marginTop: 24,
+    marginBottom: 10,
+    marginTop: 0,
   },
   sectionText: {
     color: theme.muted,
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Inter',
-    marginBottom: 8,
+    marginBottom: 18,
     lineHeight: 20,
   },
   textInputMulti: {
@@ -169,7 +175,7 @@ const styles = StyleSheet.create({
     padding: 12,
     height: 70,
     textAlignVertical: 'top',
-    marginBottom: 0,
+    marginBottom: 20,
     borderColor: theme.input,
     borderWidth: 1,
     lineHeight: 20,
