@@ -1,5 +1,5 @@
 // screens/DisguisedNotes/NoteDetailScreen.js
-
+import * as Font from 'expo-font';
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
@@ -11,11 +11,13 @@ import {
   Keyboard,
   Platform,
   StyleSheet,
+  StatusBar,
+  SafeAreaView
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useNotes } from '../../hooks/useNotes';
 import { theme } from '../../constants/colors';
-import { ArrowLeft } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import NoteToolbar from '../../components/UI/NoteToolbar';
 import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import { parseDocument } from 'htmlparser2';
@@ -154,42 +156,49 @@ export default function NoteDetailScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={handleSave}>
-              <ArrowLeft size={24} color={theme.text} />
-            </TouchableOpacity>
-            <Text style={styles.title}>{noteId ? 'Edit Note' : 'New Note'}</Text>
-            <View style={{ width: 24 }} />
-          </View>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.inner}>
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity onPress={handleSave}>
+                <ChevronLeft size={30} color={theme.text} />
+              </TouchableOpacity>
+              <Text style={styles.title}>{noteId ? 'Edit Note' : 'New Note'}</Text>
+              <View style={{ width: 24 }} />
+            </View>
 
-          {/* Title Input */}
-          <TextInput
-            placeholder="Title"
-            placeholderTextColor={theme.muted}
-            style={styles.titleInput}
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          {/* RichEditor for content */}
-          {Platform.OS === 'android' ? (
+            {/* Title Input */}
             <TextInput
-              placeholder="Write something..."
+              placeholder="Title"
               placeholderTextColor={theme.muted}
-              style={styles.plainEditor}
-              value={htmlContent}
-              onChangeText={setHtmlContent}
-              multiline
-              textAlignVertical="top"
+              style={styles.titleInput}
+              value={title}
+              onChangeText={setTitle}
             />
-          ) : (
+
+            {/* RichEditor for content */}
+            {Platform.OS === 'android' ? (
+              <TextInput
+                placeholder="Write something..."
+                placeholderTextColor={theme.muted}
+                style={styles.plainEditor}
+                value={htmlContent}
+                onChangeText={setHtmlContent}
+                multiline
+                textAlignVertical="top"
+              />
+            ) : (
             <RichEditor
               ref={editorRef}
               placeholder="Write something..."
@@ -200,50 +209,66 @@ export default function NoteDetailScreen() {
                 cleanHTMLRef.current = html;
               }}
               editorStyle={{
-                backgroundColor: theme.input,
+                backgroundColor: theme.background,
                 color: theme.text,
                 contentCSSText: `body { font-family: Inter; font-size: 16px; padding: 0 8px; }`,
               }}
             />
-          )}
+            )}
 
-          {/* Built‐in formatting toolbar (bold, italic, bullets) */}
-          {Platform.OS === 'ios' && showRichToolbar && (
-            <RichToolbar
-              editor={editorRef}
-              actions={[actions.setBold, actions.setItalic, actions.insertBulletsList]}
-              iconTint={theme.text}
-              selectedIconTint={theme.accent}
-              style={{
-                backgroundColor: theme.card,
-                borderTopWidth: 1,
-                borderTopColor: theme.border,
+            {/* Built‐in formatting toolbar (bold, italic, bullets) */}
+            {Platform.OS === 'ios' && showRichToolbar && (
+              <RichToolbar
+                editor={editorRef}
+                actions={[actions.setBold, actions.setItalic, actions.insertBulletsList]}
+                iconTint={theme.text}
+                selectedIconTint={theme.accent}
+                iconSize={24}                     // ← increase from default (24)
+                style={{
+                  backgroundColor: theme.card,
+                  borderTopWidth: 1,
+                  borderTopColor: theme.border,
+                  height: 50, // ← give it more vertical space
+                  paddingVertical: 14, // ← adjust as needed
+                }}
+                // optional: spread out icons a bit
+                iconStyle={{ marginHorizontal: 12 }}
+              />
+            )}
+
+            {/* Search bar (only visible if showSearchBar === true) */}
+            {showSearchBar && (
+              <View style={styles.searchBar}>
+                <TextInput
+                  placeholder="Search"
+                  placeholderTextColor={theme.muted}
+                  style={styles.searchInput}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+            )}
+
+            {/* Bottom toolbar: toggle search, toggle format, open calculator */}
+            <NoteToolbar
+              onSearch={() => {
+                setShowSearchBar((prev) => {
+                  if (!prev) setShowRichToolbar(false); // closing format bar
+                  return !prev;
+                });
+              }}
+              onCalculator={() => navigation.navigate('CalculatorUnlock')}
+              onFormat={() => {
+                setShowRichToolbar((prev) => {
+                  if (!prev) setShowSearchBar(false); // closing search bar
+                  return !prev;
+                });
               }}
             />
-          )}
-
-          {/* Search bar (only visible if showSearchBar === true) */}
-          {showSearchBar && (
-            <View style={styles.searchBar}>
-              <TextInput
-                placeholder="Search"
-                placeholderTextColor={theme.muted}
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
-          )}
-
-          {/* Bottom toolbar: toggle search, toggle format, open calculator */}
-          <NoteToolbar
-            onSearch={() => setShowSearchBar((prev) => !prev)}
-            onCalculator={() => navigation.navigate('CalculatorUnlock')}
-            onFormat={() => setShowRichToolbar((prev) => !prev)}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -254,36 +279,40 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 20,
+    paddingTop:10,
+    paddingHorizontal: 0,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     color: theme.text,
     fontFamily: 'Inter',
   },
   titleInput: {
-    fontSize: 20,
+    fontSize: 28,
     color: theme.text,
     fontWeight: '600',
     fontFamily: 'Inter',
-    marginBottom: 12,
+    marginVertical: 12,
+    marginHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-    paddingBottom: 4,
+    borderBottomColor: theme.input,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
   },
   richEditor: {
     flex: 1,
-    backgroundColor: theme.input,
+    backgroundColor: theme.background,
     borderRadius: 10,
-    padding: 12,
+    padding: 0,
     marginBottom: 8,
+    paddingHorizontal: 10,
   },
   searchBar: {
     marginBottom: 8,
@@ -294,16 +323,22 @@ const styles = StyleSheet.create({
     padding: 10,
     color: theme.text,
     fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 16,
+    marginHorizontal: 20,
   },
   plainEditor: {
     flex: 1,
-    backgroundColor: theme.input,
+    backgroundColor: theme.background,
     borderRadius: 10,
-    padding: 12,
     marginBottom: 8,
     color: theme.text,
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Inter',
   },
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: theme.card,
+    paddingVertical: 0,
+  }
 });

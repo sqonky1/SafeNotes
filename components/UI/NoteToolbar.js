@@ -7,13 +7,13 @@ export default function NoteToolbar({ onSearch, onCalculator, onFormat }) {
     return (
         <View style={styles.toolbar}>
         <TouchableOpacity onPress={onSearch}>
-            <TextSearch size={24} color={theme.text} />
+            <TextSearch size={28} color={theme.text} />
         </TouchableOpacity>
         <TouchableOpacity onPress={onCalculator}>
-            <Calculator size={24} color={theme.text} />
+            <Calculator size={28} color={theme.text} />
         </TouchableOpacity>
         <TouchableOpacity onPress={onFormat}>
-            <Type size={24} color={theme.text} />
+            <Type size={28} color={theme.text} />
         </TouchableOpacity>
         </View>
     );
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 20,
     backgroundColor: theme.card,
     borderTopWidth: 1,
     borderTopColor: theme.border,

@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  Platform,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useNotes } from '../../hooks/useNotes';
@@ -26,7 +29,7 @@ export default function NotesHome() {
 
   // Filter them
   const filteredNotes = safeNotesArray.filter((note) =>
-    note.title?.toLowerCase().startsWith(searchQuery.toLowerCase())
+    (note.title?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   useFocusEffect(
@@ -72,48 +75,56 @@ export default function NotesHome() {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Notes</Text>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Notes</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('NoteDetail', { noteId: null })}
+          >
+            <Text style={styles.newNote}>+ New Note</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Search"
+            placeholderTextColor={theme.muted}
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        {/* NOTES LIST */}
+        <FlatList
+          data={
+            Array.isArray(filteredNotes)
+              ? [...filteredNotes].sort((a, b) => b.timestamp - a.timestamp)
+              : []
+          }
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+          overScrollMode="never"
+        />
+
+        {/* Calculator FAB */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('NoteDetail', { noteId: null })}
+          style={styles.fab}
+          onPress={() => navigation.navigate('CalculatorUnlock')}
         >
-          <Text style={styles.newNote}>+ New Note</Text>
+          <Calculator size={34} color={theme.text} />
         </TouchableOpacity>
       </View>
-
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="Search"
-          placeholderTextColor={theme.muted}
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      {/* NOTES LIST */}
-      <FlatList
-        data={
-          Array.isArray(filteredNotes)
-            ? [...filteredNotes].sort((a, b) => b.timestamp - a.timestamp)
-            : []
-        }
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContainer}
-        overScrollMode="never"
-      />
-
-      {/* Calculator FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('CalculatorUnlock')}
-      >
-        <Calculator size={24} color={theme.text} />
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -121,32 +132,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
-    paddingTop: 50,
+    paddingTop: 10,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
   },
   headerText: {
     color: theme.text,
-    fontSize: 28,
-    fontWeight: '600',
+    fontSize: 45,
+    fontWeight: '700',
     fontFamily: 'Inter',
   },
   newNote: {
     color: theme.accent,
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Inter',
+    marginTop: 25,
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 15,
+    paddingBottom: 120,
   },
   noteCard: {
-    backgroundColor: theme.card,
+    backgroundColor: theme.background,
+    borderColor: theme.input,
+    borderWidth: 1,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -157,13 +171,13 @@ const styles = StyleSheet.create({
   },
   noteTitle: {
     color: theme.text,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '500',
     fontFamily: 'Inter',
   },
   noteTime: {
     color: theme.muted,
-    fontSize: 12,
+    fontSize: 14,
     marginTop: 8,
     fontFamily: 'Inter',
   },
@@ -172,8 +186,10 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     backgroundColor: theme.card,
-    borderRadius: 30,
-    padding: 12,
+    borderRadius: 40,
+    borderColor: theme.muted,
+    borderWidth: 0.7,
+    padding: 20,
     elevation: 4,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -181,8 +197,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    paddingHorizontal: 15,
+    marginBottom: 15,
   },
   searchInput: {
     backgroundColor: theme.card,
@@ -190,6 +206,6 @@ const styles = StyleSheet.create({
     padding: 10,
     color: theme.text,
     fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 18,
   },
 });
