@@ -16,16 +16,15 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../constants/colors';
 import BackButton from '../../components/UI/BackButton';
+import Constants from 'expo-constants';
 
 //
 // ─── GEMINI API CONFIG ─────────────────────────────────────────────────
 //
-const GEMINI_API_KEY    = 'AIzaSyCk0YJfQYMC4hJWdjOBQuAjnuS7V2M0jb0';
-const GEMINI_MODEL_ID   = 'gemini-2.0-flash';
+const { GEMINI_API_KEY, GEMINI_MODEL_ID } = Constants.expoConfig.extra;
 const GEMINI_API_ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -33,7 +32,17 @@ const GEMINI_API_ENDPOINT =
 // ─── SYSTEM PROMPT ─────────────────────────────────────────────────────
 //
 const SYSTEM_PROMPT = `
-You are a trauma-informed, compassionate support companion for survivors of domestic violence.
+You are a trauma-informed, compassionate support companion for survivors of domestic violence, built into the SafeNotes mobile app.
+
+ABOUT SAFENOTES:
+- SafeNotes is a disguised notes app designed to help victims of abuse seek help safely and privately.
+- The disguised interface is a functional notes app with a calculator.
+- Users access the real interface through a secure calculator unlock.
+- The SOS button lets users send a prefilled SMS with optional media and location links.
+- The media journal lets users save images, videos and audio recordings.
+- To keep support stable, this chat is limited to 20 messages from you per day, resetting at midnight Singapore time.
+- The app requires no account.
+- If unsure about app features, direct users to the “SafeNotes Guide” in the Information section. Do not guess.
 
 CORE PRINCIPLES:
 - Validate their experience without repeating the same phrases
@@ -306,7 +315,16 @@ export default function ChatbotScreen() {
         doMidnightRollover();
         return;
       }
-      setCountdown(formatMsToHHMMSS(rem));
+      const totalMin = Math.ceil(rem / (1000 * 60));
+      const totalHr = Math.floor(totalMin / 60);
+      const remMin = totalMin % 60;
+
+      if (totalHr < 2) {
+        setCountdown(`${totalHr}h ${remMin}m`);
+      } else {
+        const nearestHr = Math.round(rem / (1000 * 60 * 60));
+        setCountdown(`${nearestHr}h`);
+      }
     }, 1000);
   };
 
@@ -351,6 +369,9 @@ export default function ChatbotScreen() {
 
     // If exchangeCount is still null, do nothing (we have not finished loading)
     if (exchangeCount === null) return;
+
+    console.log('🔑 GEMINI_API_KEY:', GEMINI_API_KEY);
+    console.log('📦 GEMINI_MODEL_ID:', GEMINI_MODEL_ID);
 
     if (exchangeCount >= MESSAGE_LIMIT) {
       Alert.alert(
@@ -580,6 +601,7 @@ Assistant:
           contentContainerStyle={styles.chatContentContainer}
           inverted
           keyboardShouldPersistTaps="handled"
+          overScrollMode='never'
         />
 
         {/* ─── Loading Spinner ─────────────────────────────────────────── */}
