@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { TextSearch, Calculator, Type } from 'lucide-react-native';
 import { theme } from '../../constants/colors';
+import * as Haptics from 'expo-haptics';
 
 export default function NoteToolbar({ onSearch, onCalculator, onFormat }) {
     return (

@@ -46,7 +46,13 @@ export async function uploadMediaFromLocal(uri, mimeType = 'application/octet-st
         public_url: publicUrl,
         uploaded_at: new Date().toISOString(),
         mime_type: mimeType,
-        tags: [mimeType.startsWith('image') ? 'image' : 'video']
+        tags: [
+          mimeType.startsWith('image')
+            ? 'image'
+            : mimeType.startsWith('audio')
+            ? 'audio'
+            : 'video'
+        ]
     })
     });
 

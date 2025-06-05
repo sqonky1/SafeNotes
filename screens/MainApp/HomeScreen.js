@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  Alert,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../../constants/colors';
 import { TabHistoryContext } from '../../contexts/TabHistoryContext';
-
+import Constants from 'expo-constants';
 import {
   BookOpenText,
   MessageSquareText,
@@ -29,57 +32,74 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Home</Text>
-        <Text style={styles.subtitle}>Press SOS to send an {'\n'}emergency SMS.</Text>
-      </View>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        backgroundColor: theme.background,
+      }}
+    >
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Home</Text>
+          <Text style={styles.subtitle}>Press SOS to send an {'\n'}emergency SMS.</Text>
+        </View>
 
-      {/* Floating SOS Button */}
-      <TouchableOpacity
-        style={styles.sosButton}
-        onPress={() => navigation.navigate('SOS')}
-      >
-        <Text style={styles.sosText}>SOS</Text>
-      </TouchableOpacity>
+        {/* Floating SOS Button */}
+        <TouchableOpacity
+          style={styles.sosButton}
+          onPress={() => {
+            Alert.alert(
+              "Emergency SOS",
+              "Only use this function in life-threatening emergencies.\n\nAre you sure you want to proceed?",
+              [
+                { text: "Cancel", style: "cancel" },
+                { text: "I Understand", onPress: () => navigation.navigate("SOS") }
+              ]
+            );
+          }}
+        >
+          <Text style={styles.sosText}>SOS</Text>
+        </TouchableOpacity>
 
-      {/* Grid */}
-      <View style={styles.grid}>
-        <Card icon={<BookOpenText color={theme.text} 
-          size={60} />} 
-          label="Information" 
-          onPress={() => {
-            pushTab('Home');
-            navigation.navigate('Info');
-          }} 
-        />
-        <Card icon={<MessageSquareText color={theme.text} 
-          size={60} />} 
-          label="AI Chatbot" 
-          onPress={() => {
-            pushTab('Home');
-            navigation.navigate('Chatbot')
-          }} 
-        />
-        <Card icon={<Paperclip color={theme.text} 
-          size={60} />} 
-          label="Journal" 
-          onPress={() => {
-            pushTab('Home');
-            navigation.navigate('Journal')
-          }} 
-        />
-        <Card icon={<Settings color={theme.text} 
-          size={60} />} 
-          label="Settings" 
-          onPress={() => {
-            pushTab('Home');
-            navigation.navigate('Settings')
-          }} 
-        />
+        {/* Grid */}
+        <View style={styles.grid}>
+          <Card icon={<BookOpenText color={theme.text} 
+            size={60} />} 
+            label="Information" 
+            onPress={() => {
+              pushTab('Home');
+              navigation.navigate('Info');
+            }} 
+          />
+          <Card icon={<MessageSquareText color={theme.text} 
+            size={60} />} 
+            label="AI Chatbot" 
+            onPress={() => {
+              pushTab('Home');
+              navigation.navigate('Chatbot')
+            }} 
+          />
+          <Card icon={<Paperclip color={theme.text} 
+            size={60} />} 
+            label="Journal" 
+            onPress={() => {
+              pushTab('Home');
+              navigation.navigate('Journal')
+            }} 
+          />
+          <Card icon={<Settings color={theme.text} 
+            size={60} />} 
+            label="Settings" 
+            onPress={() => {
+              pushTab('Home');
+              navigation.navigate('Settings')
+            }} 
+          />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -99,7 +119,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.background,
     paddingHorizontal: 24,
-    paddingTop: 156,
+    paddingTop: 106,
   },
   header: {
     marginBottom: 32,
@@ -120,7 +140,7 @@ const styles = StyleSheet.create({
   },
   sosButton: {
     position: 'absolute',
-    top: 116,
+    top: 66,
     right: 30,
     backgroundColor: theme.danger,
     width: 160,

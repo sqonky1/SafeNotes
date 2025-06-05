@@ -21,6 +21,7 @@ export default function CalculatorUnlock() {
   const [result, setResult] = useState('');
   const [lastResult, setLastResult] = useState(null);
   const [justEvaluated, setJustEvaluated] = useState(false);
+  const { accessPin } = useContext(SettingsContext);
   const scrollRef = useRef();
 
   // PIN unlock logic
@@ -105,9 +106,8 @@ export default function CalculatorUnlock() {
     const cleaned = expression.trim();
     const lastChar = cleaned.slice(-1);
 
-    // Unlock check
-    if (cleaned === '1234') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Check for unlock PIN directly entered
+    if (cleaned === accessPin) {
       setIsUnlocked(true);
       return;
     }
