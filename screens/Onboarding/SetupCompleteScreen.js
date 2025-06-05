@@ -25,7 +25,7 @@ export default function SetupCompleteScreen({ navigation /* no onFinish prop nee
     emergencyName,
     emergencyNumber,
     emergencyRelationship,
-    shareLocationByDefault,
+    //shareLocationByDefault,
     autoWipeChoice,
     locationEnabled,
     cameraEnabled,
@@ -42,7 +42,7 @@ export default function SetupCompleteScreen({ navigation /* no onFinish prop nee
       emergencyName,
       emergencyNumber,
       emergencyRelationship,
-      shareLocationByDefault,
+      //shareLocationByDefault,
     });
     console.log({
       autoWipeChoice,
