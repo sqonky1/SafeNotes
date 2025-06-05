@@ -54,7 +54,7 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
       micEnabled,
       galleryEnabled,
     });
-    navigation.navigate('Tutorial');
+    navigation.navigate('SetupComplete');
     onFinish && onFinish();
   };
 
@@ -151,7 +151,7 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
             onPress={handleSaveAll}
             activeOpacity={0.8}
           >
-            <Text style={styles.buttonText}>Save</Text>
+            <Text style={styles.buttonText}>Finish</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

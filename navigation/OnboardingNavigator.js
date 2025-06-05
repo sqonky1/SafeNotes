@@ -17,6 +17,15 @@ export default function OnboardingNavigator() {
       <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
 
+        <Stack.Screen name="Tutorial">
+          {props => (
+            <TutorialScreen
+              {...props}
+              onFinish={() => props.navigation.navigate('PinSetup')}
+            />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen name="PinSetup">
           {props => (
             <PinSetupScreen
@@ -38,15 +47,6 @@ export default function OnboardingNavigator() {
         <Stack.Screen name="SetPreferences">
           {props => (
             <SetPreferencesScreen
-              {...props}
-              onFinish={() => props.navigation.replace('Tutorial')}
-            />
-          )}
-        </Stack.Screen>
-
-        <Stack.Screen name="Tutorial">
-          {props => (
-            <TutorialScreen
               {...props}
               onFinish={() => props.navigation.replace('SetupComplete')}
             />

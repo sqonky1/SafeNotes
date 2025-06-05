@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('PinSetup')}
+          onPress={() => navigation.navigate('Tutorial')}
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Begin Setup</Text>

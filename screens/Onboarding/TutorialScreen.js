@@ -15,11 +15,7 @@ import { theme } from '../../constants/colors';
 import { FileHeart } from 'lucide-react-native';
 
 export default function TutorialScreen({ navigation, onFinish }) {
-  const handleFinish = () => {
-    // Simply go to SetupCompleteScreen
-    navigation.navigate('SetupComplete');
-    onFinish && onFinish();
-  };
+
 
   return (
     <KeyboardAvoidingView
@@ -83,7 +79,7 @@ export default function TutorialScreen({ navigation, onFinish }) {
         <Text style={styles.sectionHeading}>Forgot Your PIN?</Text>
         <Text style={styles.textBlock}>
           Long-press '=' in the calculator for 3 seconds to unlock with biometric authentication if enabled.
-          For your safety, if biometric is disabled, you have no way to recover your PIN. 
+          For your safety, if biometrics are disabled, you have no way to recover your PIN. 
           To continue using SafeNotes, you have to reinstall the app, and all data will be erased.
           Please remember it carefully. You can enable biometrics under Settings → Privacy.
         </Text>
@@ -116,10 +112,10 @@ export default function TutorialScreen({ navigation, onFinish }) {
 
           <TouchableOpacity
             style={[styles.button, styles.finishButton]}
-            onPress={handleFinish}
+            onPress={() => navigation.navigate('PinSetup')}
             activeOpacity={0.8}
           >
-            <Text style={styles.buttonText}>Finish</Text>
+            <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

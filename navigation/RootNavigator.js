@@ -18,6 +18,8 @@ import { TapGestureHandler } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
+import OnboardingNavigator from './OnboardingNavigator';
+
 const Stack = createNativeStackNavigator()
 
 export default function RootNavigator() {
@@ -51,6 +53,7 @@ export default function RootNavigator() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
       <Stack.Screen name="NotesHome" component={NotesHome} />
       <Stack.Screen name="NoteDetail" component={NoteDetailScreen} />
       <Stack.Screen name="CalculatorUnlock" component={CalculatorUnlock} />
