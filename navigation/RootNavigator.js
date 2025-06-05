@@ -13,6 +13,9 @@ import TabNavigator from './TabNavigator'
 import SOSScreen from '../screens/MainApp/SOSScreen'
 import JournalViewScreen from '../screens/MainApp/JournalViewScreen'
 
+// Onboarding flow
+import OnboardingNavigator from './OnboardingNavigator';
+
 // For switching between real and disguised UI
 import { TapGestureHandler } from 'react-native-gesture-handler';
 import { View } from 'react-native';
@@ -21,7 +24,11 @@ import * as Haptics from 'expo-haptics';
 const Stack = createNativeStackNavigator()
 
 export default function RootNavigator() {
-  const { isUnlocked, setIsUnlocked } = useContext(SettingsContext);
+  const {
+    isUnlocked,
+    setIsUnlocked,
+    hasCompletedOnboarding,
+  } = useContext(SettingsContext);
 
   const tripleTapHandler = ({ nativeEvent }) => {
     if (nativeEvent.state === 5) {
@@ -29,6 +36,10 @@ export default function RootNavigator() {
       setIsUnlocked(false);
     }
   };
+
+  if (!hasCompletedOnboarding) {
+    return <OnboardingNavigator />;
+  }
 
   if (isUnlocked) {
     return (
@@ -46,7 +57,7 @@ export default function RootNavigator() {
           </Stack.Navigator>
         </View>
       </TapGestureHandler>
-    ); 
+    );
   }
 
   return (

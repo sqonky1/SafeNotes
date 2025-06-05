@@ -108,6 +108,7 @@ export default function CalculatorUnlock() {
 
     // Check for unlock PIN directly entered
     if (cleaned === accessPin) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setIsUnlocked(true);
       return;
     }

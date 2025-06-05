@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import debounce from 'lodash.debounce';
 
 export const SettingsContext = createContext();
+export let _internalSetHasCompletedOnboarding = null;
 
 export const SettingsProvider = ({ children }) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -24,6 +25,9 @@ export const SettingsProvider = ({ children }) => {
   // App config
   const [autoWipeTTL, setAutoWipeTTL] = useState('24h');
   const [accessPin, setAccessPin] = useState('1234');
+
+  //Onboarding state
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -51,6 +55,9 @@ export const SettingsProvider = ({ children }) => {
 
         const gal = await SecureStore.getItemAsync('galleryEnabled');
         if (gal !== null) setGalleryEnabled(gal === 'true');
+
+        const onboard = await SecureStore.getItemAsync('hasCompletedOnboarding');
+        if (onboard === 'true') setHasCompletedOnboarding(true);
       } catch (e) {
         console.warn('Failed to load settings:', e);
       }
@@ -70,6 +77,10 @@ export const SettingsProvider = ({ children }) => {
   const debouncedSaveAutoWipeTTL = debounce(async (val) => {
     await SecureStore.setItemAsync('autoWipeTTL', val);
   }, 500);
+
+  _internalSetHasCompletedOnboarding = (val) => {
+    setHasCompletedOnboarding(val);
+  };
 
   return (
     <SettingsContext.Provider
@@ -123,6 +134,12 @@ export const SettingsProvider = ({ children }) => {
         setEmergencyContact: async (val) => {
           setEmergencyContact(val);
           await SecureStore.setItemAsync('emergencyContact', JSON.stringify(val));
+        },
+
+        hasCompletedOnboarding,
+        setHasCompletedOnboarding: async (val) => {
+          setHasCompletedOnboarding(val);
+          await SecureStore.setItemAsync('hasCompletedOnboarding', JSON.stringify(val));
         },
       }}
     >

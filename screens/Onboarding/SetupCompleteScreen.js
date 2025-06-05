@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { OnboardingContext } from '../../contexts/OnboardingContext';
+import { SettingsContext } from '../../contexts/SettingsContext';
 
 import { theme } from '../../constants/colors'; // Make sure this is at the top
 
@@ -18,43 +19,32 @@ import { ShieldUser } from 'lucide-react-native';
 
 export default function SetupCompleteScreen({ navigation /* no onFinish prop needed */ }) {
   // Grab every single piece from context
-  const {
-    pin,
-    confirmPin,
-    sosMessage,
-    emergencyName,
-    emergencyNumber,
-    emergencyRelationship,
-    //shareLocationByDefault,
-    autoWipeChoice,
-    locationEnabled,
-    cameraEnabled,
-    micEnabled,
-    galleryEnabled,
-    setOnboardingDone, // we won’t actually use it
-  } = useContext(OnboardingContext);
+  const onboarding = useContext(OnboardingContext);
+  const settings = useContext(SettingsContext);
 
   const handleLaunch = () => {
-    console.log('🔐 Collected onboarding data:');
-    console.log({ pin, confirmPin });
-    console.log({
-      sosMessage,
-      emergencyName,
-      emergencyNumber,
-      emergencyRelationship,
-      //shareLocationByDefault,
-    });
-    console.log({
-      autoWipeChoice,
-      locationEnabled,
-      cameraEnabled,
-      micEnabled,
-      galleryEnabled,
-    });
-    console.log('--- End of onboarding mock data ---');
+    console.log('⛓ Syncing onboarding to settings:', onboarding);
 
-    // Expand here later if/when you want to hand off to main app
-    // For now, do nothing else. The user stays on this screen.
+    // Copy values from onboarding into settings
+    settings.setAccessPin(onboarding.pin);
+    settings.setEmergencyMessage(onboarding.sosMessage);
+    settings.setEmergencyContact({
+      name: onboarding.emergencyName,
+      number: onboarding.emergencyNumber,
+      relationship: onboarding.emergencyRelationship,
+    });
+    settings.setAutoWipeTTL(onboarding.autoWipeChoice);
+    settings.setLocationEnabled(onboarding.locationEnabled);
+    settings.setCameraEnabled(onboarding.cameraEnabled);
+    settings.setMicEnabled(onboarding.micEnabled);
+    settings.setGalleryEnabled(onboarding.galleryEnabled);
+
+    settings.setHasCompletedOnboarding(true);
+
+    setTimeout(() => {
+      console.log('✅ accessPin:', settings.accessPin);
+    }, 500);
+
   };
 
   return (

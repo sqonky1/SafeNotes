@@ -8,13 +8,16 @@ import {
   ScrollView,
   SafeAreaView,
   Platform,
-  StatusBar
+  StatusBar,
+  Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { theme } from '../../constants/colors';
 import BackButton from '../../components/UI/BackButton';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import { ChevronRight } from 'lucide-react-native';
 import * as SecureStore from 'expo-secure-store';
+import { resetAppDataAndRestartOnboarding } from '../../services/resetAppDataAndRestartOnboarding';
 
 //modals
 import EditMessageModal from '../../components/modals/EditMessageModal';
@@ -56,6 +59,9 @@ export default function SettingsScreen() {
   // Auto-wipe TTL
   const [showTTLModal, setShowTTLModal] = useState(false);
 
+  // Onboarding state
+  const { setHasCompletedOnboarding } = useContext(SettingsContext);
+
   return (
     <SafeAreaView
       style={{
@@ -64,8 +70,15 @@ export default function SettingsScreen() {
         backgroundColor: theme.background,
       }}
     >
-      <View style={{ flex: 1 }}>
-        <ScrollView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          overScrollMode='never'
+        >
           <View style={styles.header}>
             <BackButton style={styles.backButton} />
             <Text style={styles.title}>Settings</Text>
@@ -128,6 +141,32 @@ export default function SettingsScreen() {
               last
             />
           </View>
+
+          {/* RESET */}
+          <Text style={styles.sectionTitle}>Reset</Text>
+          <View style={styles.resetGroup}>
+            <ResetRow
+              label="Reset app data"
+              onPress={() =>
+                Alert.alert(
+                  'Reset App',
+                  'This will erase all data and restart onboarding. Chatbot limits will remain.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Reset',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await resetAppDataAndRestartOnboarding();
+                        setHasCompletedOnboarding(false); // <- this triggers navigator to switch to onboarding
+                      },
+                    },
+                  ]
+                )
+              }
+              last
+            />
+          </View>
         </ScrollView>
 
         <EditMessageModal
@@ -156,7 +195,7 @@ export default function SettingsScreen() {
           currentTTL={autoWipeTTL}
           onSave={setAutoWipeTTL}
         />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -168,6 +207,18 @@ export default function SettingsScreen() {
         onPress={onPress}
       >
         <Text style={styles.rowText}>{label}</Text>
+        <ChevronRight color={theme.muted} size={20} />
+      </TouchableOpacity>
+    );
+  }
+
+  function ResetRow({ label, onPress, last = false }) {
+    return (
+      <TouchableOpacity
+        style={[styles.row, last && styles.lastRow]}
+        onPress={onPress}
+      >
+        <Text style={styles.resetText}>{label}</Text>
         <ChevronRight color={theme.muted} size={20} />
       </TouchableOpacity>
     );
@@ -231,6 +282,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginBottom: 24,
   },
+  resetGroup: {
+    backgroundColor: theme.card,
+    borderRadius: 12,
+    paddingBottom: 2,
+    marginBottom: 12,
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -243,6 +300,11 @@ const styles = StyleSheet.create({
   },
   rowText: {
     color: theme.text,
+    fontFamily: 'Inter',
+    fontSize: 16,
+  },
+  resetText: {
+    color: theme.danger,
     fontFamily: 'Inter',
     fontSize: 16,
   },

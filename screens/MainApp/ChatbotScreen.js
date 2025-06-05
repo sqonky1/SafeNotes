@@ -656,14 +656,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
-    paddingTop: 30,
+    paddingTop: 40,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingTop: 20,   // simulate status bar height + spacing
     paddingBottom: 15,
     position: 'relative',
-    paddingHorizontal: 48,
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 45,
@@ -673,8 +674,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    left: -10,
-    top: -8,
+    left: -1,
+    top: -40,
   },
   clearContainer: {
     flexDirection: 'row',

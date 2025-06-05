@@ -333,6 +333,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.text,
     fontSize: 20,
+    paddingHorizontal: 30,
     fontFamily: 'Inter',
   },
   toolbar: {
