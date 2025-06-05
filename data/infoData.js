@@ -149,34 +149,43 @@ If you need a safe place to stay, the following shelters offer protection and su
     icon: 'info',
     label: 'SafeNotes Guide',
     fullText: `## Essentials
-**Disguised Entry**
-To open SafeNotes, tap the calculator icon inside the Notes screen and enter your PIN.
 
-**Exit Safely**
-Triple-tap anywhere to return instantly to the disguised Notes screen.
+  **Disguised Entry**  
+  To open SafeNotes, tap the calculator icon inside the Notes homepage or any note screen. Enter your PIN and press '=' to unlock.
 
-**Tools Inside**
-- Send SOS messages with your location
-- Access helpful Information pages
-- Talk to our AI Chatbot for emotional support
-- Record private media logs (audio, photo, video)
-- Control safety features and auto-deletion in Settings
+  **Exit Safely**  
+  Triple-tap quickly anywhere to return instantly to the disguised Notes homepage.
 
-## Additional Tips
+  **Tools Inside**  
+  - Send SOS messages with your location and selected media  
+  - Access helpful Information pages  
+  - Talk to our AI Chatbot for emotional support  
+  - Record private media logs (audio, photo, video)  
+  - Control privacy and safety features in Settings
+  &nbsp; 
+  
+  **You're in Control**  
+  No login. No tracking. Your content stays on your device unless you choose to share it.
 
-**Forgot Your PIN?**
-Long-press anywhere on the real UI for 3 seconds to unlock with biometric authentication.
+  ## Additional Tips
 
-**Hiding the App on Your Device**
-iOS
-- Tap and hold the app icon → Remove from Home Screen (The app remains accessible via Search)
+  **Forgot Your PIN?**  
+  Long-press '=' in the calculator for 3 seconds to unlock with biometric authentication if enabled. 
+  &nbsp; 
+  For your safety, if biometrics are disabled, you have no way to recover your PIN. To continue using SafeNotes, you have to reinstall the app, and all data will be erased. Please remember your PIN carefully. You can enable biometrics under Settings → Privacy.
 
-Android
-- Use your device’s Secure Folder (e.g. Samsung Secure Folder) to rename or hide SafeNotes
+  **Hiding the App on Your Device**  
+  **iOS**  
+  - Tap and hold the app icon → Remove from Home Screen (App remains accessible via Search)
 
-**Auto-Wipe Option**
-SafeNotes can automatically delete your logs and media after a set time. Configure this under Settings → Auto-Wipe.
-  `,
+  **Android**  
+  - Use your device’s Secure Folder (e.g. Samsung Secure Folder) to rename or hide SafeNotes.
+  &nbsp; 
+
+  **Media Journal**  
+  SafeNotes can automatically delete your media after a set time. Configure this under Settings → Privacy → Auto-Wipe.  
+  &nbsp; 
+  To record photos, videos or audio, make sure camera and microphone access are enabled under Settings. To upload media from your phone gallery, enable gallery access under Settings.`
   },
   {
     icon: 'info',
