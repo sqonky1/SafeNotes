@@ -46,7 +46,7 @@ supabase/functions/delete-expired-media/.env
 .vscode/
 app.config.js
 
-# android/ios
+# Native build files and configs
 android/
 ios/
 
