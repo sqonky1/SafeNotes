@@ -4,6 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 // Main Info menu
 import InfoScreen from '../screens/MainApp/InfoScreen'
 
+//  subpage
+import InfoDetailScreen from '../screens/MainApp/InfoDetailScreen'
+
 // Subpages
 import InfoSignsOfViolenceScreen from '../screens/MainApp/Info/InfoSignsOfViolenceScreen'
 import InfoDangerActionScreen from '../screens/MainApp/Info/InfoDangerActionScreen'
@@ -26,6 +29,11 @@ export default function InfoStackNavigator() {
       }}
     >
       <Stack.Screen name="InfoMenu" component={InfoScreen} options={{ title: 'Info' }} />
+      <Stack.Screen
+        name="InfoDetail"
+        component={InfoDetailScreen}
+        options={{ title: 'Information' }}
+      />
       <Stack.Screen name="SignsOfViolence" component={InfoSignsOfViolenceScreen} />
       <Stack.Screen name="DangerAction" component={InfoDangerActionScreen} />
       <Stack.Screen name="LegalSupport" component={InfoLegalSupportScreen} />
