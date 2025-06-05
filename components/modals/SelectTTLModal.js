@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     color: theme.text,
     fontFamily: 'Inter',
     fontWeight: 'bold',
@@ -84,7 +84,11 @@ const styles = StyleSheet.create({
     borderColor: theme.border,
   },
   selectedOption: {
-    backgroundColor: theme.highlight,
+    backgroundColor: theme.card,
+    borderColor: theme.muted,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 12,
   },
   optionText: {
     fontSize: 15,
@@ -102,5 +106,6 @@ const styles = StyleSheet.create({
   cancelText: {
     color: theme.muted,
     fontFamily: 'Inter',
+    fontSize: 16,
   },
 });

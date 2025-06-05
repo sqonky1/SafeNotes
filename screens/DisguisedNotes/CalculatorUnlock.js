@@ -104,6 +104,9 @@ export default function CalculatorUnlock() {
 
   const handleEvaluate = () => {
     const cleaned = expression.trim();
+
+    if (cleaned === '') return;
+
     const lastChar = cleaned.slice(-1);
 
     // Check for unlock PIN directly entered

@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingTop: 20,   // simulate status bar height + spacing
-    paddingBottom: 15,
+    paddingBottom: 12,
     position: 'relative',
     paddingHorizontal: 24,
   },

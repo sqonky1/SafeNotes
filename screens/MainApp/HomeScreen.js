@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../../constants/colors';
 import { TabHistoryContext } from '../../contexts/TabHistoryContext';
-import Constants from 'expo-constants';
+import * as Haptics from 'expo-haptics';
 import {
   BookOpenText,
   MessageSquareText,
@@ -50,6 +50,7 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={styles.sosButton}
           onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
             Alert.alert(
               "Emergency SOS",
               "Only use this function in life-threatening emergencies.\n\nAre you sure you want to proceed?",

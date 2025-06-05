@@ -1,5 +1,5 @@
 import express from 'express';
-import handler from './supabase-backend/deleteExpiredMedia.js';
+import handler from '../supabase-backend/deleteExpiredMedia.js';
 
 const app = express();
 

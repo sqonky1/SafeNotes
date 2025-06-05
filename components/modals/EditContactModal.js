@@ -159,17 +159,18 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     color: theme.text,
     fontFamily: 'Inter',
     fontWeight: 'bold',
     marginBottom: 12,
+    marginLeft: 4,
   },
   input: {
     backgroundColor: theme.input,
     color: theme.text,
     fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 15,
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
@@ -185,6 +186,8 @@ const styles = StyleSheet.create({
   cancelText: {
     color: theme.muted,
     fontFamily: 'Inter',
+    paddingTop: 8,
+    fontSize: 16,
   },
   saveBtn: {
     backgroundColor: theme.accent,
@@ -196,5 +199,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontFamily: 'Inter',
+    fontSize: 16,
   },
 });
