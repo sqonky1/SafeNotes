@@ -32,11 +32,12 @@ export function OnboardingProvider({ children }) {
   //const [shareLocationByDefault, setShareLocationByDefault] = useState(true);
 
   // 3) Preferences toggles
-  const [autoWipeChoice, setAutoWipeChoice] = useState('24h');
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [cameraEnabled, setCameraEnabled] = useState(true);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [galleryEnabled, setGalleryEnabled] = useState(true);
+  const [autoWipeChoice, setAutoWipeChoice] = useState('never');
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [galleryEnabled, setGalleryEnabled] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
 
   // A generic setter so we can call context.setField('pin', '1234'), etc.
   const setField = (key, value) => {
@@ -65,6 +66,8 @@ export function OnboardingProvider({ children }) {
         return setMicEnabled(value);
       case 'galleryEnabled':
         return setGalleryEnabled(value);
+      case 'biometricEnabled':
+        return setBiometricEnabled(value);
       default:
         console.warn(`OnboardingContext: unknown key "${key}"`);
     }
@@ -86,6 +89,7 @@ export function OnboardingProvider({ children }) {
         micEnabled,
         galleryEnabled,
         setField,
+        biometricEnabled,
       }}
     >
       {children}

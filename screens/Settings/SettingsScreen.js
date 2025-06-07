@@ -45,6 +45,8 @@ export default function SettingsScreen() {
     setAutoWipeTTL,
     isUnlocked,
     setIsUnlocked,
+    biometricEnabled,
+    setBiometricEnabled,
   } = useContext(SettingsContext);
 
   // Access PIN
@@ -124,6 +126,11 @@ export default function SettingsScreen() {
                 setGalleryEnabled(val);
                 SecureStore.setItemAsync('galleryEnabled', val.toString());
               }}
+            />
+            <ToggleRow
+              label="Enable biometric unlock"
+              value={biometricEnabled}
+              onValueChange={(val) => setBiometricEnabled(val)}
               last
             />
           </View>

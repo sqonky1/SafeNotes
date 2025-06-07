@@ -9,10 +9,11 @@ export const SettingsProvider = ({ children }) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   // Privacy toggles
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [cameraEnabled, setCameraEnabled] = useState(true);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [galleryEnabled, setGalleryEnabled] = useState(true);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(false);
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [galleryEnabled, setGalleryEnabled] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false); // default off
 
   // Safety settings
   const [emergencyMessage, setEmergencyMessage] = useState('Help me, I am in danger. Please respond quickly.');
@@ -23,7 +24,7 @@ export const SettingsProvider = ({ children }) => {
   });
 
   // App config
-  const [autoWipeTTL, setAutoWipeTTL] = useState('24h');
+  const [autoWipeTTL, setAutoWipeTTL] = useState('never');
   const [accessPin, setAccessPin] = useState('1234');
 
   //Onboarding state
@@ -58,6 +59,9 @@ export const SettingsProvider = ({ children }) => {
 
         const onboard = await SecureStore.getItemAsync('hasCompletedOnboarding');
         if (onboard === 'true') setHasCompletedOnboarding(true);
+
+        const bio = await SecureStore.getItemAsync('biometricEnabled');
+        if (bio !== null) setBiometricEnabled(bio === 'true');
       } catch (e) {
         console.warn('Failed to load settings:', e);
       }
@@ -140,6 +144,12 @@ export const SettingsProvider = ({ children }) => {
         setHasCompletedOnboarding: async (val) => {
           setHasCompletedOnboarding(val);
           await SecureStore.setItemAsync('hasCompletedOnboarding', JSON.stringify(val));
+        },
+
+        biometricEnabled,
+        setBiometricEnabled: async (val) => {
+          setBiometricEnabled(val);
+          await SecureStore.setItemAsync('biometricEnabled', JSON.stringify(val));
         },
       }}
     >

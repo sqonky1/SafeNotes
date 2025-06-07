@@ -14,6 +14,8 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SettingsContext } from '../../contexts/SettingsContext';
 import * as Haptics from 'expo-haptics';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { LongPressGestureHandler, State } from 'react-native-gesture-handler';
 
 export default function CalculatorUnlock() {
   const navigation = useNavigation();
@@ -21,11 +23,9 @@ export default function CalculatorUnlock() {
   const [result, setResult] = useState('');
   const [lastResult, setLastResult] = useState(null);
   const [justEvaluated, setJustEvaluated] = useState(false);
-  const { accessPin } = useContext(SettingsContext);
+  const { accessPin, setIsUnlocked, biometricEnabled } = useContext(SettingsContext);
   const scrollRef = useRef();
 
-  // PIN unlock logic
-  const { setIsUnlocked } = useContext(SettingsContext);
 
   const handlePress = (value) => {
     const operators = ['+', '-', '*', '/', '%'];
@@ -108,8 +108,12 @@ export default function CalculatorUnlock() {
       return;
     }
 
+    let evalReady;
+
     try {
-      let evalResult = eval(cleaned.replace(/%/g, '/100'));
+      evalReady = cleaned.replace(/(\d+(\.\d+)?)%(?!\d)/g, '($1/100)');
+      
+      let evalResult = eval(evalReady);
 
       if (typeof evalResult === 'number' && isFinite(evalResult)) {
         evalResult = Number(evalResult.toPrecision(10));
@@ -124,19 +128,65 @@ export default function CalculatorUnlock() {
     }
   };
 
-  const renderButton = (label, onPress, key) => (
-    <TouchableOpacity
-      key={key}
-      style={[
-        label === 'zero' ? styles.longButton : styles.button,
-        label === '=' || label === '+' || label === '−' || label === '×' || label === '÷' ? styles.operator : null,
-        label === 'AC' || label === '⌫' ? styles.functionButton : null,
-      ]}
-      onPress={onPress}
-    >
-      <Text style={styles.buttonText}>{label === 'zero' ? '0' : label}</Text>
-    </TouchableOpacity>
-  );
+  const renderButton = (label, onPress, key) => {
+    const baseButton = (
+      <TouchableOpacity
+        key={key}
+        style={[
+          label === 'zero' ? styles.longButton : styles.button,
+          label === '=' || label === '+' || label === '−' || label === '×' || label === '÷' ? styles.operator : null,
+          label === 'AC' || label === '⌫' ? styles.functionButton : null,
+        ]}
+        onPress={onPress}
+      >
+        <Text style={styles.buttonText}>{label === 'zero' ? '0' : label}</Text>
+      </TouchableOpacity>
+    );
+
+    if (label === '=') {
+      return (
+        <LongPressGestureHandler
+          key={key}
+          minDurationMs={1500}
+          onHandlerStateChange={({ nativeEvent }) => {
+            if (nativeEvent.state === State.ACTIVE) {
+              console.log('Long press detected');
+              handleBiometricUnlock();
+            }
+          }}
+        >
+          {baseButton}
+        </LongPressGestureHandler>
+      );
+    }
+
+    return baseButton;
+  }
+
+  const handleBiometricUnlock = async () => {
+    if (!biometricEnabled) return;
+
+    const supported = await LocalAuthentication.hasHardwareAsync();
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+
+    if (!supported || !enrolled) {
+      alert('Biometric authentication not available.');
+      return;
+    }
+
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Authenticate to unlock SafeNotes',
+      fallbackLabel: 'Use PIN instead',
+      disableDeviceFallback: true,
+    });
+
+    if (result.success) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setIsUnlocked(true);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
 
   const buttons = [
     ['AC', '⌫', '%', '÷'],

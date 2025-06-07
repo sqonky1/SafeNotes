@@ -38,6 +38,7 @@ export default function SetupCompleteScreen({ navigation /* no onFinish prop nee
     settings.setCameraEnabled(onboarding.cameraEnabled);
     settings.setMicEnabled(onboarding.micEnabled);
     settings.setGalleryEnabled(onboarding.galleryEnabled);
+    settings.setBiometricEnabled(onboarding.biometricEnabled);
 
     settings.setHasCompletedOnboarding(true);
 

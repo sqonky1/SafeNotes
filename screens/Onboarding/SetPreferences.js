@@ -44,6 +44,7 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
     micEnabled,
     galleryEnabled,
     setField,
+    biometricEnabled,
   } = useContext(OnboardingContext);
 
   const handleSaveAll = () => {
@@ -84,7 +85,9 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
             activeOpacity={0.7}
           >
             <Text style={styles.dropdownText}>Select auto-wipe type</Text>
-            <Text style={styles.dropdownValue}>{autoWipeChoice}</Text>
+            <Text style={styles.dropdownValue}>
+              {autoWipeChoice === 'never' ? 'Never' : `Every ${autoWipeChoice}`}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -135,6 +138,22 @@ export default function SetPreferencesScreen({ navigation, onFinish }) {
           >
             {galleryEnabled ? <CheckboxChecked /> : <CheckboxUnchecked />}
             <Text style={styles.checkboxLabel}>Enable media gallery access</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeading}>Biometric Unlock</Text>
+          <Text style={styles.sectionText}>
+            Allows long-press on "=" in the calculator to use Face ID or fingerprint unlock.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            onPress={() => setField('biometricEnabled', !biometricEnabled)}
+            activeOpacity={0.7}
+          >
+            {biometricEnabled ? <CheckboxChecked /> : <CheckboxUnchecked />}
+            <Text style={styles.checkboxLabel}>Enable biometric unlock</Text>
           </TouchableOpacity>
         </View>
 

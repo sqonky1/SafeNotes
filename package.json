@@ -60,7 +60,8 @@
     "react-native-webview": "13.13.5",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "expo-local-authentication": "~16.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -170,7 +170,7 @@ If you need a safe place to stay, the following shelters offer protection and su
   ## Additional Tips
 
   **Forgot Your PIN?**  
-  Long-press '=' in the calculator for 3 seconds to unlock with biometric authentication if enabled. 
+  Long-press '=' in the calculator for 1.5 seconds to unlock with biometric authentication if enabled. 
   &nbsp; 
   For your safety, if biometrics are disabled, you have no way to recover your PIN. To continue using SafeNotes, you have to reinstall the app, and all data will be erased. Please remember your PIN carefully. You can enable biometrics under Settings → Privacy.
 

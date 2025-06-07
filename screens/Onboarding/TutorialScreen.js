@@ -78,7 +78,7 @@ export default function TutorialScreen({ navigation, onFinish }) {
 
         <Text style={styles.sectionHeading}>Forgot Your PIN?</Text>
         <Text style={styles.textBlock}>
-          Long-press '=' in the calculator for 3 seconds to unlock with biometric authentication if enabled.
+          Long-press '=' in the calculator for 1.5 seconds to unlock with biometric authentication if enabled.
           For your safety, if biometrics are disabled, you have no way to recover your PIN. 
           To continue using SafeNotes, you have to reinstall the app, and all data will be erased.
           Please remember it carefully. You can enable biometrics under Settings → Privacy.
