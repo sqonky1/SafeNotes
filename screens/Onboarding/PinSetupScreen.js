@@ -65,10 +65,6 @@ export default function PinSetupScreen({ navigation, onFinish }) {
     onFinish && onFinish();
   };
 
-  const KEY_WIDTH = 118;
-  const KEY_HEIGHT = 85;
-  const H_GAP = 8;
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -151,14 +147,7 @@ export default function PinSetupScreen({ navigation, onFinish }) {
             {row.map((key) => (
               <TouchableOpacity
                 key={key}
-                style={[
-                  styles.keyButton,
-                  {
-                    width: KEY_WIDTH,
-                    height: KEY_HEIGHT,
-                    marginHorizontal: H_GAP / 2,
-                  },
-                ]}
+                style={styles.keyButton}
                 onPress={() => handleDigitPress(key)}
                 activeOpacity={0.6}
               >
@@ -171,13 +160,13 @@ export default function PinSetupScreen({ navigation, onFinish }) {
         <View style={styles.keypadRow}>
           <TouchableOpacity
             style={{
-              width: KEY_WIDTH * 2 + H_GAP,
-              height: KEY_HEIGHT,
-              backgroundColor: '#1A1A1A',
-              borderRadius: 8,
+              flex: 2,
+              aspectRatio: 2.4,
+              backgroundColor: theme.card,
+              borderRadius: 10,
               justifyContent: 'center',
               alignItems: 'center',
-              marginHorizontal: H_GAP / 2,
+              marginHorizontal: 6,
             }}
             onPress={() => handleDigitPress('0')}
             activeOpacity={0.6}
@@ -186,14 +175,15 @@ export default function PinSetupScreen({ navigation, onFinish }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.keyButton,
-              {
-                width: KEY_WIDTH,
-                height: KEY_HEIGHT,
-                marginHorizontal: H_GAP / 2,
-              },
-            ]}
+            style={{
+              flex: 1,
+              aspectRatio: 1.2,
+              backgroundColor: theme.card,
+              borderRadius: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginHorizontal: 6,
+            }}
             onPress={handleBackspace}
             activeOpacity={0.6}
           >
@@ -298,17 +288,19 @@ const styles = StyleSheet.create({
   },
 
   keypadWrapper: {
-    width: 328,
-    height: 358,
-    align: 'center',
-    marginBottom: 24,
+    width: '100%',
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 16, // prevent edge clipping
   },
 
   keypadRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 3,
+    width: '90%',
+    alignSelf: 'center',
+    marginVertical: 6,
   },
 
   keyButton: {
@@ -316,6 +308,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
+    aspectRatio: 1.2, // square-ish
+    marginHorizontal: 6,
   },
 
   keyText: {

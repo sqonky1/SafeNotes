@@ -75,19 +75,6 @@ export default function CalculatorUnlock() {
       setJustEvaluated(false);
       return;
     }
-  
-    // Prevent leading zero chaining (e.g. 01, 00, 012)
-    if (
-      value >= '0' && value <= '9' && // current input is a digit
-      expression.length > 0
-    ) {
-      const parts = expression.split(/[\+\-\*\/%]/); // split by operators
-      const lastPart = parts[parts.length - 1];
-
-      if (lastPart === '0') {
-        return; // stop if trying to chain after a leading 0
-      }
-    }
 
     setExpression(prev => prev + value);
   };

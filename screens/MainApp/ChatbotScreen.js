@@ -15,6 +15,7 @@ import {
   Animated,
   StyleSheet,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../../constants/colors';
@@ -561,91 +562,92 @@ Assistant:
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
-        backgroundColor: theme.background,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
-      <View style={styles.container}>
-        {/* ─── Header ───────────────────────────────────────────────────── */}
-        <View style={styles.header}>
-          <BackButton style={styles.backButton} />
-          <Text style={styles.title}>Chatbot</Text>
-        </View>
-
-        {/* ─── Exchanges Left & COUNTDOWN ALWAYS SHOWN ───────────────────── */}
-        <View style={styles.clearContainer}>
-          <Text style={styles.limitText}>
-            {remaining > 0
-              ? `Messages left: ${remaining}`
-              : 'Limit reached'}
-          </Text>
-
-          {/* The countdown is now unconditional, so it always appears */}
-          <Text style={[styles.limitText, { marginLeft: 12 }]}>
-            Resets in: {countdown}
-          </Text>
-
-          <TouchableOpacity onPress={clearChat} style={styles.clearButton}>
-            <Text style={styles.clearButtonText}>Clear Chat</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ─── Chat History (inverted so newest at bottom) ──────────────── */}
-        <FlatList
-          data={messages}
-          renderItem={renderMessageItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.chatContentContainer}
-          inverted
-          keyboardShouldPersistTaps="handled"
-          overScrollMode='never'
-        />
-
-        {/* ─── Loading Spinner ─────────────────────────────────────────── */}
-        {isLoading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Listening...</Text>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+          backgroundColor: theme.background,
+        }}
+      >
+        <View style={styles.container}>
+          {/* ─── Header ───────────────────────────────────────────────────── */}
+          <View style={styles.header}>
+            <BackButton style={styles.backButton} />
+            <Text style={styles.title}>Chatbot</Text>
           </View>
-        )}
 
-        {/* ─── Input Area ──────────────────────────────────────────────── */}
-        <Animated.View
-          style={[
-            styles.inputWrapper,
-            {
-              marginBottom: Platform.OS === 'ios'
-                ? Animated.diffClamp(keyboardHeight, 0, 200)
-                : 0,
-            },
-          ]}
-        >
-          <TextInput
-            style={[styles.inputField, { color: '#FFF' }]}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type your message..."
-            placeholderTextColor="#AAA"
-            editable={!isLoading && exchangeCount < MESSAGE_LIMIT}
-            multiline
+          {/* ─── Exchanges Left & COUNTDOWN ALWAYS SHOWN ───────────────────── */}
+          <View style={styles.clearContainer}>
+            <Text style={styles.limitText}>
+              {remaining > 0
+                ? `Messages left: ${remaining}`
+                : 'Limit reached'}
+            </Text>
+
+            {/* The countdown is now unconditional, so it always appears */}
+            <Text style={[styles.limitText, { marginLeft: 12 }]}>
+              Resets in: {countdown}
+            </Text>
+
+            <TouchableOpacity onPress={clearChat} style={styles.clearButton}>
+              <Text style={styles.clearButtonText}>Clear Chat</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ─── Chat History (inverted so newest at bottom) ──────────────── */}
+          <FlatList
+            data={messages}
+            renderItem={renderMessageItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.chatContentContainer}
+            inverted
+            keyboardShouldPersistTaps="handled"
+            overScrollMode='never'
           />
-          <TouchableOpacity
+
+          {/* ─── Loading Spinner ─────────────────────────────────────────── */}
+          {isLoading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <Text style={styles.loadingText}>Listening...</Text>
+            </View>
+          )}
+
+          {/* ─── Input Area ──────────────────────────────────────────────── */}
+          <Animated.View
             style={[
-              styles.sendButton,
-              (isLoading || !inputText.trim() || exchangeCount >= MESSAGE_LIMIT) &&
-                styles.sendButtonDisabled,
+              styles.inputWrapper,
             ]}
-            onPress={handleSendPress}
-            disabled={isLoading || !inputText.trim() || exchangeCount >= MESSAGE_LIMIT}
           >
-            <Text style={styles.sendButtonText}>Send</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-    </SafeAreaView>
+            <TextInput
+              style={[styles.inputField, { color: '#FFF' }]}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Type your message..."
+              placeholderTextColor="#AAA"
+              editable={!isLoading && exchangeCount < MESSAGE_LIMIT}
+              multiline
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                (isLoading || !inputText.trim() || exchangeCount >= MESSAGE_LIMIT) &&
+                  styles.sendButtonDisabled,
+              ]}
+              onPress={handleSendPress}
+              disabled={isLoading || !inputText.trim() || exchangeCount >= MESSAGE_LIMIT}
+            >
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
