@@ -69,7 +69,7 @@ export default function NotesHome() {
         </TouchableOpacity>
       </View>
       <Text style={styles.noteTime}>
-        {new Date(item.timestamp).toLocaleString()}
+        {formatTimestamp(item.timestamp)}
       </Text>
     </TouchableOpacity>
   );
@@ -126,6 +126,32 @@ export default function NotesHome() {
       </View>
     </SafeAreaView>
   );
+}
+
+function formatTimestamp(timestamp) {
+  const date = new Date(Math.round(new Date(timestamp).getTime() / 60000) * 60000);
+  const now = new Date();
+  
+  const isToday = date.toDateString() === now.toDateString();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  const timeStr = date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  if (isToday) return `Today • ${timeStr}`;
+  if (isYesterday) return `Yesterday • ${timeStr}`;
+
+  return `${date.toLocaleDateString([], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })} • ${timeStr}`;
 }
 
 const styles = StyleSheet.create({
