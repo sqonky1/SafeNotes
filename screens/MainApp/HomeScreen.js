@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
   sosButton: {
     position: 'absolute',
     top: 66,
-    right: 30,
+    right: 27,
     backgroundColor: theme.danger,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: screenWidth * 0.36,  // responsive sizing
+    height: screenWidth * 0.36,
+    borderRadius: (screenWidth * 0.36) / 2,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   sosText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 50,
+    fontSize: screenWidth * 0.12, // ~36 on iPhone 14 Pro
     fontFamily: 'Inter',
   },
   grid: {

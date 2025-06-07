@@ -23,7 +23,7 @@ export default function InfoScreen() {
     <SafeAreaView
       style={{
         flex: 1,
-        paddingTop: Platform.OS === 'android' ? 10 : StatusBar.currentHeight,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         backgroundColor: theme.background,
       }}
     >
