@@ -94,7 +94,7 @@ SafeNotes is a disguised crisis management and reporting app for domestic violen
 - **SecureStore**: AES256-encrypted local storage (for PIN, settings, emergency data)
 - **AsyncStorage**: Stores chatbot message history and journal media
 - **Supabase**: Cloud storage for SOS media uploads and metadata with cron-based expiry
-- **Cloudflare Workers**: Generates dynamic HTML pages to display up to 5 media items (media auto-expires via cron + 404 behavior)
+- **Cloudflare Workers**: Generates dynamic HTML pages to display up to 5 media items
 
 ## ⭐ Limitations & Notes
 
