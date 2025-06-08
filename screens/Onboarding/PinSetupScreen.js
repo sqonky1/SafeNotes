@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 
 import { OnboardingContext } from '../../contexts/OnboardingContext';
@@ -66,154 +67,164 @@ export default function PinSetupScreen({ navigation, onFinish }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      contentContainerStyle={{ 
+        flexGrow: 1,
+        paddingBottom: 120,
+      }}
+      overScrollMode="never"
+      keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.heading}>
-        Set Your 4-Digit{"\n"}
-        Unlock PIN
-      </Text>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.select({ ios: 'padding', android: undefined })}
+      >
+        <Text style={styles.heading}>
+          Set Your 4-Digit{"\n"}
+          Unlock PIN
+        </Text>
 
-      <Text style={styles.sectionText}>
-        This PIN will be entered in the calculator to unlock the real SafeNotes interface.
-      </Text>
+        <Text style={styles.sectionText}>
+          This PIN will be entered in the calculator to unlock the real SafeNotes interface.
+        </Text>
 
-      <Text style={styles.sectionText}>
-        Choose something you can remember, but others won’t guess.
-      </Text>
+        <Text style={styles.sectionText}>
+          Choose something you can remember, but others won’t guess.
+        </Text>
 
-      <View style={styles.fieldsContainer}>
-        {/* PIN field */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setActiveField('pin')}
-          style={[
-            styles.pinField,
-            activeField === 'pin' && styles.fieldFocused,
-          ]}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={pin ? styles.pinFieldText : styles.placeholderText}>
-              {pin ? (showPin ? pin : '•'.repeat(pin.length)) : 'Enter 4-Digit PIN'}
-            </Text>
-            {pin.length > 0 && (
-              <TouchableOpacity onPress={() => setShowPin(!showPin)}>
-                <Feather
-                  name={showPin ? 'eye' : 'eye-off'}
-                  size={20}
-                  color={theme.muted}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </TouchableOpacity>
-
-        {/* Confirm PIN field */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setActiveField('confirm')}
-          style={[
-            styles.pinField,
-            activeField === 'confirm' && styles.fieldFocused,
-          ]}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={confirmPin ? styles.pinFieldText : styles.placeholderText}>
-              {confirmPin
-                ? (showConfirmPin ? confirmPin : '•'.repeat(confirmPin.length))
-                : 'Confirm 4-Digit PIN'}
-            </Text>
-            {confirmPin.length > 0 && (
-              <TouchableOpacity onPress={() => setShowConfirmPin(!showConfirmPin)}>
-                <Feather
-                  name={showConfirmPin ? 'eye' : 'eye-off'}
-                  size={20}
-                  color={theme.muted}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.keypadWrapper}>
-        {[
-          ['7', '8', '9'],
-          ['4', '5', '6'],
-          ['1', '2', '3'],
-        ].map((row, rowIndex) => (
-          <View key={`row-${rowIndex}`} style={styles.keypadRow}>
-            {row.map((key) => (
-              <TouchableOpacity
-                key={key}
-                style={styles.keyButton}
-                onPress={() => handleDigitPress(key)}
-                activeOpacity={0.6}
-              >
-                <Text style={styles.keyText}>{key}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-
-        <View style={styles.keypadRow}>
+        <View style={styles.fieldsContainer}>
+          {/* PIN field */}
           <TouchableOpacity
-            style={{
-              flex: 2,
-              aspectRatio: 2.4,
-              backgroundColor: theme.card,
-              borderRadius: 10,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginHorizontal: 6,
-            }}
-            onPress={() => handleDigitPress('0')}
-            activeOpacity={0.6}
+            activeOpacity={0.8}
+            onPress={() => setActiveField('pin')}
+            style={[
+              styles.pinField,
+              activeField === 'pin' && styles.fieldFocused,
+            ]}
           >
-            <Text style={styles.keyText}>0</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={pin ? styles.pinFieldText : styles.placeholderText}>
+                {pin ? (showPin ? pin : '•'.repeat(pin.length)) : 'Enter 4-Digit PIN'}
+              </Text>
+              {pin.length > 0 && (
+                <TouchableOpacity onPress={() => setShowPin(!showPin)}>
+                  <Feather
+                    name={showPin ? 'eye' : 'eye-off'}
+                    size={20}
+                    color={theme.muted}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </TouchableOpacity>
 
+          {/* Confirm PIN field */}
           <TouchableOpacity
-            style={{
-              flex: 1,
-              aspectRatio: 1.2,
-              backgroundColor: theme.card,
-              borderRadius: 10,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginHorizontal: 6,
-            }}
-            onPress={handleBackspace}
-            activeOpacity={0.6}
+            activeOpacity={0.8}
+            onPress={() => setActiveField('confirm')}
+            style={[
+              styles.pinField,
+              activeField === 'confirm' && styles.fieldFocused,
+            ]}
           >
-            <BackspaceIcon />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={confirmPin ? styles.pinFieldText : styles.placeholderText}>
+                {confirmPin
+                  ? (showConfirmPin ? confirmPin : '•'.repeat(confirmPin.length))
+                  : 'Confirm 4-Digit PIN'}
+              </Text>
+              {confirmPin.length > 0 && (
+                <TouchableOpacity onPress={() => setShowConfirmPin(!showConfirmPin)}>
+                  <Feather
+                    name={showConfirmPin ? 'eye' : 'eye-off'}
+                    size={20}
+                    color={theme.muted}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.backButton]}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>Back</Text>
-        </TouchableOpacity>
+        <View style={styles.keypadWrapper}>
+          {[
+            ['7', '8', '9'],
+            ['4', '5', '6'],
+            ['1', '2', '3'],
+          ].map((row, rowIndex) => (
+            <View key={`row-${rowIndex}`} style={styles.keypadRow}>
+              {row.map((key) => (
+                <TouchableOpacity
+                  key={key}
+                  style={styles.keyButton}
+                  onPress={() => handleDigitPress(key)}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.keyText}>{key}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
 
-        <TouchableOpacity
-          style={[
-            styles.button,
-            isMatching ? styles.saveButtonEnabled : styles.saveButtonDisabled,
-          ]}
-          onPress={handleSave}
-          disabled={!isMatching}
-          activeOpacity={isMatching ? 0.8 : 1}
-        >
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          <View style={styles.keypadRow}>
+            <TouchableOpacity
+              style={{
+                flex: 2,
+                aspectRatio: 2.4,
+                backgroundColor: theme.card,
+                borderRadius: 10,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginHorizontal: 6,
+              }}
+              onPress={() => handleDigitPress('0')}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.keyText}>0</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                aspectRatio: 1.2,
+                backgroundColor: theme.card,
+                borderRadius: 10,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginHorizontal: 6,
+              }}
+              onPress={handleBackspace}
+              activeOpacity={0.6}
+            >
+              <BackspaceIcon />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.backButton]}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              isMatching ? styles.saveButtonEnabled : styles.saveButtonDisabled,
+            ]}
+            onPress={handleSave}
+            disabled={!isMatching}
+            activeOpacity={isMatching ? 0.8 : 1}
+          >
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
