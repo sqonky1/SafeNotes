@@ -96,6 +96,10 @@ SafeNotes is a disguised crisis management and reporting app for domestic violen
 - **Supabase**: Cloud storage for SOS media uploads and metadata with cron-based expiry
 - **Cloudflare Workers**: Generates dynamic HTML pages to display up to 5 media items
 
+## ⭐ Architecture
+
+<img src="./architecture/Architecture.png" width="750" />
+
 ## ⭐ Limitations & Notes
 
 - No user authentication (for safety & privacy)
