@@ -74,7 +74,7 @@ If you need a safe place to stay, the following shelters offer protection and su
 
 - **Casa Raudha Women Home:**  
   Muslim-run shelter that supports women of all backgrounds.  
-  - Call: [6741 6770](tel:67416770) (Mon–Fri, 9am–5pm)
+  - Call: [8963 0887](tel:89630887) (Mon–Fri, 9am–5pm)
 
 - **AWARE Women's Services:**  
   Provides support and referrals to safe accommodations.  
@@ -87,46 +87,52 @@ If you need a safe place to stay, the following shelters offer protection and su
 
 **Emergency Services**
 
-- **SPF:** [**999**](tel:999) (24 hours)
+- **SPF:** 
+  Emergency Hotline: [999](tel:999) (24 hours)
+  Emergency SMS: [70999](sms:70999) (24 hours)
 
-- **SCDF:** [**995**](tel:995) (24 hours)
+- **SCDF:** [995](tel:995) (24 hours)
 
-- **ComCare Call Centre:** [**1800 222 0000**](tel:18002220000) (24 hours)  
+- **ComCare Call Centre:** [1800 222 0000](tel:18002220000) (24 hours)  
   For urgent financial or social assistance.
 
 **Family Violence & Abuse Support**
 
+- **NAVH (National Anti-Violence & Sexual Harassment):**
+  Helpline: [1800 777 0000](tel:18007770000)
+  Online Reporting Form: [https://go.gov.sg/navh](https://go.gov.sg/navh)
+
 - **PAVE (Protection Against Violence):**  
-  [**6555 0390**](tel:65550390) (Mon–Fri, 9am–5pm)
+  [6555 0390](tel:65550390) (Mon–Fri, 9am–5pm)
 
 - **AWARE Women’s Helpline:**  
-  [**1800 777 5555**](tel:18007775555) (Mon–Fri, 10am–6pm)
+  [1800 777 5555](tel:18007775555) (Mon–Fri, 10am–6pm)
 
 - **TRANS SAFE Centre:**  
-  [**6449 9088**](tel:64499088)
+  [6449 9088](tel:64499088)
 
 - **Casa Raudha Women Home:**  
-  [**6786 6210**](tel:67866210)
+  [8963 0887](tel:89630887)
 
 **Mental Health & Emotional Support**
 
 - **Samaritans of Singapore (SOS):**  
-  [**1-767**](tel:1767) (24 hours)
+  [1-767](tel:1767) (24 hours)
 
 - **Institute of Mental Health (IMH) Helpline:**  
-  [**6389 2222**](tel:63892222) (24 hours)
+  [6389 2222](tel:63892222) (24 hours)
 
 - **Silver Ribbon (Singapore):**  
-  [**6386 1928**](tel:63861928)
+  [6386 1928](tel:63861928)
 
 **Child & Youth Support**
 
 - **TOUCHline (Family & Youth Services):**  
-  [**1800 377 2252**](tel:18003772252) (Mon–Fri, 9am–6pm)
+  [1800 377 2252](tel:18003772252) (Mon–Fri, 9am–6pm)
 
 - **Tinkle Friend (For Children aged 7–12):**  
-  [**1800 2744 788**](tel:18002744788) (Mon–Fri, 2.30pm–5pm)  
-  Also available via online chat at [**www.tinklefriend.sg**](https://www.tinklefriend.sg)`,
+  [1800 2744 788](tel:18002744788) (Mon–Fri, 2.30pm–5pm)  
+  Also available via online chat at [www.tinklefriend.sg](https://www.tinklefriend.sg)`,
   },
   {
     icon: 'info',
@@ -185,7 +191,7 @@ If you need a safe place to stay, the following shelters offer protection and su
   **Media Journal**  
   SafeNotes can automatically delete your media after a set time. Configure this under Settings → Privacy → Auto-Wipe.  
   &nbsp; 
-  To record photos, videos or audio, make sure camera and microphone access are enabled under Settings. To upload media from your phone gallery, enable gallery access under Settings.`
+  To record photos, videos or audio, make sure camera and microphone access are enabled under Settings. To upload media from your phone gallery, enable gallery access under Settings.`,
   },
   {
     icon: 'info',

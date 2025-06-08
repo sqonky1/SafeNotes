@@ -134,10 +134,20 @@ export default function ChatbotScreen() {
   //
   // ─── LOCAL UI STATE ─────────────────────────────────────────────────
   //
-  const [messages, setMessages]         = useState(initialMessages);
-  const [inputText, setInputText]       = useState('');
-  const [isLoading, setIsLoading]       = useState(false);
-  const [keyboardHeight]                = useState(new Animated.Value(0));
+  const [chatHistory, setChatHistory] = useState([
+    {
+      role: 'user',
+      parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+      hidden: true, // hide system prompt from UI
+    },
+    {
+      role: 'model',
+      parts: [{ text: 'Hi there! I’m here to listen and support you. How can I help today?' }],
+    },
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [keyboardHeight] = useState(new Animated.Value(0));
 
   //
   // ─── PERSISTED STATE (and Countdown) ─────────────────────────────────
@@ -156,6 +166,7 @@ export default function ChatbotScreen() {
 
   // A ref so we can clearInterval on unmount
   const countdownInterval = useRef(null);
+  const flatListRef = useRef(null);
 
   //
   // ─── UTILITY: Get “today’s date string” in SG timezone as “YYYY-MM-DD” ───
@@ -198,16 +209,46 @@ export default function ChatbotScreen() {
         if (storedMessages) {
           const parsed = JSON.parse(storedMessages);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setMessages(parsed);
+            setChatHistory(parsed);
           } else {
-            setMessages(initialMessages);
+            setChatHistory([
+              {
+                role: 'user',
+                parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+                hidden: true,
+              },
+              {
+                role: 'model',
+                parts: [{ text: 'Hi there! I’m here to listen and support you. How can I help today?' }],
+              },
+            ]);
           }
         } else {
-          setMessages(initialMessages);
+          setChatHistory([
+            {
+              role: 'user',
+              parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+              hidden: true,
+            },
+            {
+              role: 'model',
+              parts: [{ text: 'Hi there! I’m here to listen and support you. How can I help today?' }],
+            },
+          ]);
         }
       } catch (err) {
         console.warn('Failed to load chat messages:', err);
-        setMessages(initialMessages);
+        setChatHistory([
+          {
+            role: 'user',
+            parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+            hidden: true,
+          },
+          {
+            role: 'model',
+            parts: [{ text: 'Hi there! I’m here to listen and support you. How can I help today?' }],
+          },
+        ]);
       }
 
       // 2) Load stored exchangeCount & lastResetDate
@@ -255,14 +296,9 @@ export default function ChatbotScreen() {
   // ─── PERSIST chat messages whenever they change (trim to 40) ───────────
   //
   useEffect(() => {
-    if (messages.length > 40) {
-      const trimmed = messages.slice(0, 40);
-      setMessages(trimmed);
-      AsyncStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(trimmed)).catch(console.error);
-    } else {
-      AsyncStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(messages)).catch(console.error);
-    }
-  }, [messages]);
+    AsyncStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(chatHistory))
+      .catch(console.error);
+  }, [chatHistory]);
 
   //
   // ─── PERSIST any changes to exchangeCount or lastResetDate ─────────────
@@ -355,10 +391,18 @@ export default function ChatbotScreen() {
 
   //
   // ─── clearChat() ──────────────────────────────────────────────────────
-  //   Wipes just the chat bubbles—DOES NOT change exchangeCount or countdown.
-  //
   const clearChat = () => {
-    setMessages(initialMessages);
+    setChatHistory([
+      {
+        role: 'user',
+        parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+        hidden: true,
+      },
+      {
+        role: 'model',
+        parts: [{ text: 'Hi there! I’m here to listen and support you. How can I help today?' }],
+      },
+    ]);
     setInputText('');
   };
 
@@ -366,13 +410,7 @@ export default function ChatbotScreen() {
   // ─── sendMessageToGemini(userText) ─────────────────────────────────────
   //
   const sendMessageToGemini = async (userText) => {
-    if (!userText.trim()) return;
-
-    // If exchangeCount is still null, do nothing (we have not finished loading)
-    if (exchangeCount === null) return;
-
-    console.log('🔑 GEMINI_API_KEY:', GEMINI_API_KEY);
-    console.log('📦 GEMINI_MODEL_ID:', GEMINI_MODEL_ID);
+    if (!userText.trim() || exchangeCount === null) return;
 
     if (exchangeCount >= MESSAGE_LIMIT) {
       Alert.alert(
@@ -384,40 +422,19 @@ export default function ChatbotScreen() {
 
     setIsLoading(true);
 
-    // 1) Show user bubble immediately
-    const userBubble = {
-      id: Date.now().toString() + '-user',
-      sender: 'user',
-      text: userText.trim(),
+    // Show user bubble in UI immediately
+    const userMsg = {
+      role: 'user',
+      parts: [{ text: userText.trim() }],
     };
-    setMessages(prev => [userBubble, ...prev]);
+    setChatHistory(prev => [...prev, userMsg]);
     setInputText('');
 
     try {
-      // 2) Build “prompt” (SYSTEM_PROMPT + up to last 20 messages)
-      const lastTurns = messages
-        .slice(0, 20)
-        .map(m => {
-          const roleTag = m.sender === 'user' ? 'User:' : 'Assistant:';
-          return `${roleTag} ${m.text}`;
-        })
-        .join('\n');
-
-      const fullPrompt = `
-${SYSTEM_PROMPT}
-
-${lastTurns.length ? lastTurns + '\n' : ''}User: ${userText.trim()}
-Assistant:
-      `.trim();
-
-      // 3) Construct request body
       const requestBody = {
         contents: [
-          {
-            parts: [
-              { text: fullPrompt }
-            ],
-          },
+          ...chatHistory.map(({ role, parts }) => ({ role, parts })), // strips hidden
+          userMsg,
         ],
         generationConfig: {
           temperature: 0.75,
@@ -431,64 +448,39 @@ Assistant:
           { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_LOW_AND_ABOVE' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_LOW_AND_ABOVE' },
           { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_LOW_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_CIVIC_INTEGRITY',    threshold: 'BLOCK_LOW_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_CIVIC_INTEGRITY',   threshold: 'BLOCK_LOW_AND_ABOVE' },
         ],
       };
 
-      // 4) POST to Gemini
       const response = await fetch(GEMINI_API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
 
-      // 5) Parse JSON
       const responseJson = await response.json();
-      console.log('🔍 Gemini returned:', JSON.stringify(responseJson, null, 2));
 
       if (!response.ok) {
-        const errMsg =
-          responseJson?.error?.message ||
-          `Request failed with status ${response.status}`;
-        throw new Error(errMsg);
+        throw new Error(responseJson?.error?.message || `Request failed with status ${response.status}`);
       }
 
-      // 6) Extract bot’s reply
-      let botReply = "Sorry, I couldn’t generate a proper response.";
-      if (
-        responseJson.candidates &&
-        responseJson.candidates[0] &&
-        responseJson.candidates[0].content &&
-        responseJson.candidates[0].content.parts &&
-        responseJson.candidates[0].content.parts[0] &&
-        typeof responseJson.candidates[0].content.parts[0].text === 'string'
-      ) {
-        botReply = responseJson.candidates[0].content.parts[0].text.trim();
-      } else {
-        console.warn(
-          'Unexpected API response shape:',
-          JSON.stringify(responseJson, null, 2)
-        );
-      }
+      const botReply = responseJson.candidates?.[0]?.content?.parts?.[0]?.text?.trim() 
+        || "Sorry, I couldn’t generate a proper response.";
 
-      // 7) Prepend bot bubble
-      const botBubble = {
-        id: Date.now().toString() + '-bot',
-        sender: 'bot',
-        text: botReply,
+      const botMsg = {
+        role: 'model',
+        parts: [{ text: botReply }],
       };
-      setMessages(prev => [botBubble, ...prev]);
-
-      // 8) Increment the “full exchange” count for today
+      setChatHistory(prev => [...prev, botMsg]);
       setExchangeCount(prev => (prev === null ? 1 : prev + 1));
-    } catch (error) {
-      console.error('Failed to send message to Gemini:', error);
-      const errorBubble = {
-        id: Date.now().toString() + '-error',
-        sender: 'bot',
-        text: `⚠️ Error: ${error.message}`,
+
+    } catch (err) {
+      console.error('Gemini API error:', err);
+      const errorMsg = {
+        role: 'model',
+        parts: [{ text: `⚠️ Error: ${err.message}` }],
       };
-      setMessages(prev => [errorBubble, ...prev]);
+      setChatHistory(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -589,7 +581,6 @@ Assistant:
                 : 'Limit reached'}
             </Text>
 
-            {/* The countdown is now unconditional, so it always appears */}
             <Text style={[styles.limitText, { marginLeft: 12 }]}>
               Resets in: {countdown}
             </Text>
@@ -599,16 +590,29 @@ Assistant:
             </TouchableOpacity>
           </View>
 
-          {/* ─── Chat History (inverted so newest at bottom) ──────────────── */}
-          <FlatList
-            data={messages}
-            renderItem={renderMessageItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.chatContentContainer}
-            inverted
-            keyboardShouldPersistTaps="handled"
-            overScrollMode='never'
-          />
+          {/* ─── Transform chatHistory to messages for display ───────────── */}
+          {(() => {
+            const messages = chatHistory
+              .filter(m => (m.role === 'user' || m.role === 'model') && !m.hidden)
+              .map((m, i) => ({
+                id: `m-${i}`,
+                sender: m.role === 'user' ? 'user' : 'bot',
+                text: m.parts[0]?.text || '',
+              }));
+
+            return (
+              <FlatList
+                data={messages}
+                renderItem={renderMessageItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.chatContentContainer}
+                keyboardShouldPersistTaps="handled"
+                overScrollMode='never'
+                ref={flatListRef}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+              />
+            );
+          })()}
 
           {/* ─── Loading Spinner ─────────────────────────────────────────── */}
           {isLoading && (
@@ -708,6 +712,8 @@ const styles = StyleSheet.create({
   chatContentContainer: {
     paddingHorizontal: 12,
     paddingVertical: 16,
+    flexGrow: 1,
+    justifyContent: 'flex-end'
   },
   bubble: {
     paddingVertical: 10,
