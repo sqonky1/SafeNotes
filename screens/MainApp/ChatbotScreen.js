@@ -296,7 +296,7 @@ export default function ChatbotScreen() {
   // ─── PERSIST chat messages whenever they change (trim to 40) ───────────
   //
   useEffect(() => {
-    AsyncStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(chatHistory))
+    AsyncStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(chatHistory.slice(-40)))
       .catch(console.error);
   }, [chatHistory]);
 
@@ -432,10 +432,14 @@ export default function ChatbotScreen() {
 
     try {
       const requestBody = {
-        contents: [
-          ...chatHistory.map(({ role, parts }) => ({ role, parts })), // strips hidden
-          userMsg,
-        ],
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: SYSTEM_PROMPT + '\n\nUser: Hi' }],
+      },
+      ...chatHistory.slice(1).slice(-20).map(({ role, parts }) => ({ role, parts })),
+      userMsg,
+    ],
         generationConfig: {
           temperature: 0.75,
           topP: 0.9,
@@ -501,10 +505,17 @@ export default function ChatbotScreen() {
   const renderMessageItem = ({ item }) => {
     const isUser = item.sender === 'user';
     return (
-      <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
-        <Text style={isUser ? styles.userText : styles.botText} selectable>
-          {item.text}
-        </Text>
+      <View
+        style={[
+          styles.messageRow,
+          { justifyContent: isUser ? 'flex-end' : 'flex-start' }
+        ]}
+      >
+        <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
+          <Text style={isUser ? styles.userText : styles.botText}>
+            {item.text}
+          </Text>
+        </View>
       </View>
     );
   };
@@ -710,10 +721,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   chatContentContainer: {
-    paddingHorizontal: 12,
     paddingVertical: 16,
     flexGrow: 1,
     justifyContent: 'flex-end'
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 12,
+    marginVertical: 6,    // vertical spacing
   },
   bubble: {
     paddingVertical: 10,
@@ -721,6 +737,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginVertical: 6,
     maxWidth: '80%',
+    flexShrink: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -729,13 +746,13 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     backgroundColor: theme.accent,
-    alignSelf: 'flex-end',
     borderBottomRightRadius: 5,
+    alignSelf: 'flex-end',
   },
   botBubble: {
     backgroundColor: theme.input,
-    alignSelf: 'flex-start',
     borderBottomLeftRadius: 5,
+    alignSelf: 'flex-start',
   },
   userText: {
     color: theme.text,
