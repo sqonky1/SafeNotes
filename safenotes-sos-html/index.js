@@ -23,11 +23,20 @@ export default {
                 color: #fff;
                 font-family: Arial, sans-serif;
                 padding: 20px;
-                padding-bottom: 60px; /* ← Prevents audio player from being clipped on iOS */
-                min-height: 100vh;     /* ← Ensures scrollable content height */
+                padding-bottom: 60px; /* Prevents audio player from being clipped on iOS */
+                min-height: 100vh;     /* Ensures scrollable content height */
+                font-size: 3.5vw;        /* Adjust font size based on viewport width */
+                text-align: left;      /* Align everything to the left */
               }
-              h1 { color: #CA3535; }
-              .media-item { margin-bottom: 20px; }
+              h1 { 
+                color: #CA3535; 
+                font-size: 6.5vw;        /* Adjust header size relative to the viewport width */
+                text-align: left;      /* Ensure heading is left-aligned */
+              }
+              .media-item { 
+                margin-bottom: 20px;
+                text-align: left;    /* Align media left */
+              }
               video, img {
                 max-width: 100%;
                 max-height: 500px;
@@ -36,13 +45,26 @@ export default {
                 border: 1px solid #444;
                 border-radius: 10px;
                 display: block;
-                margin: 0 auto;
+                margin-left: 0;    /* Align left */
+                margin-right: 0;   /* Align left */
               }
               audio {
                 width: 100%;
                 max-width: 600px;
                 display: block;
                 margin-top: 8px;
+                margin-left: 0;    /* Align left */
+                margin-right: 0;   /* Align left */
+              }
+
+              /* Media Query for small screens like phones */
+              @media screen and (max-width: 600px) {
+                body {
+                  font-size: 6vw;    /* Increase font size for smaller screens */
+                }
+                h1 {
+                  font-size: 10vw;   /* Increase header size for smaller screens */
+                }
               }
             </style>
           </head>
@@ -69,7 +91,6 @@ export default {
                 url.endsWith('.amr') ||
                 url.endsWith('.opus')
               ) {
-                // Pick the correct type string for each
                 let sourceTag;
                 if (url.endsWith('.3gp')) {
                   sourceTag = `<source src="${url}" type="audio/3gpp">`;

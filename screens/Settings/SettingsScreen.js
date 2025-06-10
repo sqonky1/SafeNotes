@@ -174,23 +174,6 @@ export default function SettingsScreen() {
               last
             />
           </View>
-          <TouchableOpacity
-            onPress={() => {
-              setHasCompletedOnboarding(false);
-              alert('Onboarding will show again on next app start');
-            }}
-            style={{
-              paddingVertical: 14,
-              paddingHorizontal: 20,
-              borderBottomWidth: 1,
-              borderColor: theme.border,
-              backgroundColor: theme.card,
-            }}
-          >
-            <Text style={{ color: theme.danger, fontSize: 16 }}>
-              🔁 Reset to Onboarding (TEMP)
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
 
         <EditMessageModal
